@@ -10,11 +10,11 @@ public class LevenshteinTest {
     @Test
     public void testLevenshteinDistance() throws Exception {
 
-        assertEquals(Levenshtein.distance("", ""), 0);
-        assertEquals(Levenshtein.distance("FOO", ""), 3);
-        assertEquals(Levenshtein.distance("", "BAR"), 3);
-        assertEquals(Levenshtein.distance("FOO", "BAR"), 3);
-        assertEquals(Levenshtein.distance("FOO", "FOF"), 1);
+        assertEquals(0, Levenshtein.distance("", ""));
+        assertEquals(3, Levenshtein.distance("FOO", ""));
+        assertEquals(3, Levenshtein.distance("", "BAR"));
+        assertEquals(3, Levenshtein.distance("FOO", "BAR"));
+        assertEquals(1, Levenshtein.distance("FOO", "FOF"));
 
     }
 

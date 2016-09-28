@@ -13,7 +13,7 @@ public class USHMMDateTest {
     @Test
     public void testUSHMMDateSimilarity() throws Exception {
 
-        assertEquals(USHMMDate.similarity("19120931", "19120931"), 1, DELTA);
+        assertEquals(1, USHMMDate.similarity("19120931", "19120931"), DELTA);
         assertTrue(USHMMDate.similarity("19120931", "19120931") > USHMMDate.similarity("19120931", "19120901"));
         assertTrue(USHMMDate.similarity("19120931", "19120901") > USHMMDate.similarity("19120931", "19120201"));
         assertTrue(USHMMDate.similarity("19120931", "19120201") > USHMMDate.similarity("600", "18500512"));
