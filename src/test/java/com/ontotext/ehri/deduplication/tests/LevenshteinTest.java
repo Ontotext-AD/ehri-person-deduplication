@@ -15,6 +15,7 @@ public class LevenshteinTest {
         assertEquals(3, Levenshtein.distance("", "BAR"));
         assertEquals(3, Levenshtein.distance("FOO", "BAR"));
         assertEquals(1, Levenshtein.distance("FOO", "FOF"));
+        assertEquals(2, Levenshtein.distance("FOO", "OFO"));
 
     }
 
