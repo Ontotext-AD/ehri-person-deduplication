@@ -1,5 +1,16 @@
 package com.ontotext.ehri.deduplication.measures;
 
+/**
+ *  The Jaro–Winkler (Winkler, 1990) distance is a measure of similarity between two strings.
+ *  It is a variant of the Jaro distance metric (Jaro, 1989, 1995), a type of string edit distance.
+ *  The Jaro–Winkler distance metric is designed and best suited for short strings such as person names.
+ *  The score is normalized such that 0 equates to no similarity and 1 is an exact match.
+ *
+ *  This implementation is based on the Jaro Winkler similarity algorithm
+ *  from <a href="https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance">
+ *  https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance</a>.
+ */
+
 public class JaroWinkler {
 
     private static final double DEFAULT_SCALING_FACTOR = 0.1;

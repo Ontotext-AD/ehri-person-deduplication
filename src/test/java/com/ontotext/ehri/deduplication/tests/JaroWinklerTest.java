@@ -12,9 +12,11 @@ public class JaroWinklerTest {
     @Test
     public void testJaroWinklerDistance() throws Exception {
 
+        assertEquals(1.000, JaroWinkler.distance("MARTHA", "MARTHA"), DELTA);
         assertEquals(0.961, JaroWinkler.distance("MARTHA", "MARHTA"), DELTA);
-        assertEquals(0.84, JaroWinkler.distance("DWAYNE", "DUANE"), DELTA);
+        assertEquals(0.840, JaroWinkler.distance("DWAYNE", "DUANE"), DELTA);
         assertEquals(0.814, JaroWinkler.distance("DIXON", "DICKSONX"), DELTA);
+        assertEquals(0.000, JaroWinkler.distance("MARTHA", "DICKSONX"), DELTA);
 
     }
 }
