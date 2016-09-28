@@ -9,6 +9,9 @@ package com.ontotext.ehri.deduplication.measures;
  *  Each date is a string in the form of "yyyymmdd".
  *  The date can be invalid.
  *  Any part can be omitted. In which case it is replaced with zeros (leading zeros are dropped).
+ *
+ *  The score is in the closed interval [0, 1].
+ *  1 indicates exact match of the dates with no omitted parts.
  */
 
 public class USHMMDate {
