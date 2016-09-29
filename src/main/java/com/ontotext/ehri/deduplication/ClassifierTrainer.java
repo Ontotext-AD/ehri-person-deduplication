@@ -17,9 +17,9 @@ import java.util.*;
 public class ClassifierTrainer {
 
     private static final int SCORES_COUNT = 3;
-    private static final int F1 = 0;
-    private static final int PRECISION = 1;
-    private static final int RECALL = 2;
+    private static final int F1_OFFSET = 0;
+    private static final int PRECISION_OFFSET = 1;
+    private static final int RECALL_OFFSET = 2;
 
     private static final int COUNT_EXPERIMENTS = 10;
     private static final double TRAIN_TO_ALL_RATIO = 0.9;
@@ -118,9 +118,9 @@ public class ClassifierTrainer {
     private void getLabelScores(int experiment, double[] experimentScores, int i) {
         double[][] labelScores = perLabelScores.get(yA.lookupInt(i));
         int labelScoresOffset = (SCORES_COUNT * 2) + (i * SCORES_COUNT);
-        labelScores[experiment][F1] = experimentScores[labelScoresOffset + F1];
-        labelScores[experiment][PRECISION] = experimentScores[labelScoresOffset + PRECISION];
-        labelScores[experiment][RECALL] = experimentScores[labelScoresOffset + RECALL];
+        labelScores[experiment][F1_OFFSET] = experimentScores[labelScoresOffset + F1_OFFSET];
+        labelScores[experiment][PRECISION_OFFSET] = experimentScores[labelScoresOffset + PRECISION_OFFSET];
+        labelScores[experiment][RECALL_OFFSET] = experimentScores[labelScoresOffset + RECALL_OFFSET];
     }
 
     private void reportResultsAndSaveModel(LinearClassifier linearClassifier)
