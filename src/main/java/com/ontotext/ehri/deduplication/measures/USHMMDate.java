@@ -1,17 +1,17 @@
 package com.ontotext.ehri.deduplication.measures;
 
 /**
- *  This class computes the similarity score between two dates.
- *  The implementation is specific for the dates coming from
- *  the USHMM (United States Holocaust Memorial Museum)
- *  HSV (Holocaust Survivors and Victims) Database.
- *
- *  Each date is a string in the form of "yyyymmdd".
- *  The date can be invalid.
- *  Any part can be omitted. In which case it is replaced with zeros (leading zeros are dropped).
- *
- *  The score is in the closed interval [0, 1].
- *  1 indicates exact match of the dates with no omitted parts.
+ * This class computes the similarity score between two dates.
+ * The implementation is specific for the dates coming from
+ * the USHMM (United States Holocaust Memorial Museum)
+ * HSV (Holocaust Survivors and Victims) Database.
+ * <p>
+ * Each date is a string in the form of "yyyymmdd".
+ * The date can be invalid.
+ * Any part can be omitted. In which case it is replaced with zeros (leading zeros are dropped).
+ * <p>
+ * The score is in the closed interval [0, 1].
+ * 1 indicates exact match of the dates with no omitted parts.
  */
 
 public class USHMMDate {
