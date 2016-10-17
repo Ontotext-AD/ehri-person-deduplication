@@ -1,4 +1,4 @@
-package com.ontotext.ehri.deduplication;
+package com.ontotext.ehri.deduplication.training;
 
 import classification.algorithms.MultithreadedSigmoidPerceptron;
 import classification.functions.CompleteFeatureFunction;
@@ -27,9 +27,6 @@ public class ClassifierTrainer {
     private static final int DEFAULT_NUMBER_OF_ITERATIONS = 200;
     private static final int DEFAULT_NUMBER_OF_THREADS = 4;
 
-    private String resultsFilename;
-    private String modelPath;
-
     private Alphabet xA;
     private Alphabet yA;
     private List<ClassificationInstance> allData;
@@ -37,11 +34,9 @@ public class ClassifierTrainer {
     private Map<Integer, double[]> perExperimentScores;
     private Map<String, double[][]> perLabelScores;
 
-    public ClassifierTrainer(List<ClassificationInstance> allData, String resultsFilename, String modelPath) {
+    public ClassifierTrainer(List<ClassificationInstance> allData) {
 
         this.allData = allData;
-        this.resultsFilename = resultsFilename;
-        this.modelPath = modelPath;
 
         getAlphabetsAndStopGrowth();
         initializeScoresMaps();
@@ -70,9 +65,9 @@ public class ClassifierTrainer {
         return sortedSet;
     }
 
-    public void trainAndSaveModel() throws IOException, URISyntaxException {
+    public void trainAndSaveModel(String resultsFilename, String modelPath) throws IOException, URISyntaxException {
         LinearClassifier linearClassifier = trainModel();
-        reportResultsAndSaveModel(linearClassifier);
+        reportResultsAndSaveModel(linearClassifier, resultsFilename, modelPath);
     }
 
     private LinearClassifier trainModel() {
@@ -92,7 +87,7 @@ public class ClassifierTrainer {
     }
 
     private LinearClassifier trainClassifierAndStoreComputedScores(int experiment,
-                                                                          List<ClassificationInstance> trainData, List<ClassificationInstance> testData) {
+                                                                   List<ClassificationInstance> trainData, List<ClassificationInstance> testData) {
         LinearClassifier linearClassifier = trainMultithreadedSigmoidPerceptron(
                 DEFAULT_NUMBER_OF_ITERATIONS, DEFAULT_NUMBER_OF_THREADS, trainData
         );
@@ -101,7 +96,7 @@ public class ClassifierTrainer {
     }
 
     private LinearClassifier trainMultithreadedSigmoidPerceptron(int numberOfIterations, int numberOfThreads,
-                                                                        List<ClassificationInstance> trainData) {
+                                                                 List<ClassificationInstance> trainData) {
         MultithreadedSigmoidPerceptron multithreadedSigmoidPerceptron = new MultithreadedSigmoidPerceptron(
                 numberOfIterations, numberOfThreads, xA, yA, new CompleteFeatureFunction(xA, yA)
         );
@@ -123,7 +118,7 @@ public class ClassifierTrainer {
         labelScores[experiment][RECALL_OFFSET] = experimentScores[labelScoresOffset + RECALL_OFFSET];
     }
 
-    private void reportResultsAndSaveModel(LinearClassifier linearClassifier)
+    private void reportResultsAndSaveModel(LinearClassifier linearClassifier, String resultsFilename, String modelPath)
             throws IOException, URISyntaxException {
         ReportRenderer.renderResultsSingleLabel(resultsFilename, COUNT_EXPERIMENTS, perLabelScores, perExperimentScores);
         IOUtils.saveModel(linearClassifier, new File(modelPath).toURI().toURL());
