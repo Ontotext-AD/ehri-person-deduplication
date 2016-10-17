@@ -1,14 +1,14 @@
 package com.ontotext.ehri.deduplication.measures;
 
 /**
- *  The Jaro–Winkler (Winkler, 1990) distance is a measure of similarity between two strings.
- *  It is a variant of the Jaro distance metric (Jaro, 1989, 1995), a type of string edit distance.
- *  The Jaro–Winkler distance metric is designed and best suited for short strings such as person names.
- *  The score is normalized such that 0 equates to no similarity and 1 is an exact match.
- *
- *  This implementation is based on the Jaro Winkler similarity algorithm
- *  from <a href="https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance">
- *  https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance</a>.
+ * The Jaro–Winkler (Winkler, 1990) distance is a measure of similarity between two strings.
+ * It is a variant of the Jaro distance metric (Jaro, 1989, 1995), a type of string edit distance.
+ * The Jaro–Winkler distance metric is designed and best suited for short strings such as person names.
+ * The score is normalized such that 0 equates to no similarity and 1 is an exact match.
+ * <p>
+ * This implementation is based on the Jaro Winkler similarity algorithm
+ * from <a href="https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance">
+ * https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance</a>.
  */
 
 public class JaroWinkler {
@@ -20,20 +20,28 @@ public class JaroWinkler {
         return distance(s1, s2, DEFAULT_SCALING_FACTOR);
     }
 
-    public static double distance(String s1, String s2, double scalingFactor) {
-        int windowSize = getWindowSize(s1, s2);
-        String matches1 = getMatchingCharactersWithin(s2, s1, windowSize);
-        String matches2 = getMatchingCharactersWithin(s1, s2, windowSize);
+    private static double distance(String s1, String s2, double scalingFactor) {
+        String longer, shorter;
+        if (s1.length() > s2.length()) {
+            longer = s1.toLowerCase();
+            shorter = s2.toLowerCase();
+        } else {
+            longer = s2.toLowerCase();
+            shorter = s1.toLowerCase();
+        }
 
-        if (matches1.length() == 0)
+        int windowSize = getWindowSize(longer);
+        String matches1 = getMatchingCharactersWithin(shorter, longer, windowSize);
+        String matches2 = getMatchingCharactersWithin(longer, shorter, windowSize);
+
+        if (matches1.length() == 0 || matches2.length() == 0 || matches1.length() != matches2.length())
             return 0.0;
 
         return calculateJaroWinklerDistance(s1, s2, scalingFactor, matches1, matches2);
     }
 
-    private static int getWindowSize(String s1, String s2) {
-        String longer = s1.length() >= s2.length() ? s1 : s2;
-        return Math.max(0, (longer.length() / 2) - 1);
+    private static int getWindowSize(String s) {
+        return Math.max(0, (s.length() / 2) - 1);
     }
 
     private static String getMatchingCharactersWithin(String s1, String s2, int windowSize) {
