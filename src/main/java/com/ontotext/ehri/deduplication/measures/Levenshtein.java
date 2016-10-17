@@ -1,13 +1,13 @@
 package com.ontotext.ehri.deduplication.measures;
 
 /**
- *  The Levenshtein distance is a string metric for measuring the difference between two sequences.
- *  Informally, the Levenshtein distance between two words is the minimum number of single-character edits
- *  (i.e. insertions, deletions or substitutions) required to change one word into the other.
- *
- *  This implementation computes the Levenshtein distance iteratively with two matrix rows.
- *  The algorithm is described in <a href="https://en.wikipedia.org/wiki/Levenshtein_distance">
- *  https://en.wikipedia.org/wiki/Levenshtein_distance</a>.
+ * The Levenshtein distance is a string metric for measuring the difference between two sequences.
+ * Informally, the Levenshtein distance between two words is the minimum number of single-character edits
+ * (i.e. insertions, deletions or substitutions) required to change one word into the other.
+ * <p>
+ * This implementation computes the Levenshtein distance iteratively with two matrix rows.
+ * The algorithm is described in <a href="https://en.wikipedia.org/wiki/Levenshtein_distance">
+ * https://en.wikipedia.org/wiki/Levenshtein_distance</a>.
  */
 
 public class Levenshtein {
@@ -15,6 +15,13 @@ public class Levenshtein {
     private static final int DELETION_COST = 1;
     private static final int INSERTION_COST = 1;
     private static final int SUBSTITUTION_COST = 1;
+
+    public static double similarity(String s, String t) {
+        if (isEmptyString(s) && isEmptyString(t))
+            return 1 - distance(s, t);
+        else
+            return 1 - (distance(s, t) / (double) Math.max(s.length(), t.length()));
+    }
 
     public static int distance(String s, String t) {
         if (isEmptyString(s))
@@ -60,8 +67,7 @@ public class Levenshtein {
     }
 
     private static void copy(int[] currentRowDistances, int[] previousRowDistances) {
-        for (int j = 0; j < previousRowDistances.length; j++)
-            previousRowDistances[j] = currentRowDistances[j];
+        System.arraycopy(currentRowDistances, 0, previousRowDistances, 0, previousRowDistances.length);
     }
 
 }
