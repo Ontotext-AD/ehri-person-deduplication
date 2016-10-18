@@ -76,17 +76,16 @@ class USHMMClassificationInstanceFactory {
     }
 
     private void addJaroWinklerNamesFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
-        sparseVector.add(xA.lookupObject("jwf"), JaroWinkler.distance(
-                statementsMap.get(personId1, "firstName"),
-                statementsMap.get(personId2, "firstName")));
+        String firstPersonFirstName = statementsMap.get(personId1, "firstName");
+        String firstPersonLastName = statementsMap.get(personId1, "lastName");
+        String secondPersonFirstName = statementsMap.get(personId2, "firstName");
+        String secondPersonLastName = statementsMap.get(personId2, "lastName");
 
-        sparseVector.add(xA.lookupObject("jwl"), JaroWinkler.distance(
-                statementsMap.get(personId1, "lastName"),
-                statementsMap.get(personId2, "lastName")));
+        sparseVector.add(xA.lookupObject("jwf"), JaroWinkler.distance(firstPersonFirstName, secondPersonFirstName));
+        sparseVector.add(xA.lookupObject("jwl"), JaroWinkler.distance(firstPersonLastName, secondPersonLastName));
 
-        sparseVector.add(xA.lookupObject("jw"), JaroWinkler.distance(
-                statementsMap.get(personId1, "firstName") + " " + statementsMap.get(personId1, "lastName"),
-                statementsMap.get(personId2, "firstName") + " " + statementsMap.get(personId2, "lastName")));
+        sparseVector.add(xA.lookupObject("jw"), JaroWinkler.distance(firstPersonFirstName + " " + firstPersonLastName,
+                secondPersonFirstName + " " + secondPersonLastName));
     }
 
     private void addJaroWinklerNormalizedNamesFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
@@ -104,23 +103,14 @@ class USHMMClassificationInstanceFactory {
     }
 
     private void addDoubleMetaphoneFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
-        if (statementsMap.get(personId1, "nameDM").equals(
-                statementsMap.get(personId2, "nameDM")))
-            sparseVector.add(xA.lookupObject("dmn"), 1.0d);
-        else
-            sparseVector.add(xA.lookupObject("dmn"), 0.0d);
+        sparseVector.add(xA.lookupObject("dmn"), (statementsMap.get(personId1, "nameDM").equals(
+                statementsMap.get(personId2, "nameDM"))) ? 1.0d : 0.0d);
 
-        if (statementsMap.get(personId1, "firstNameDM").equals(
-                statementsMap.get(personId2, "firstNameDM")))
-            sparseVector.add(xA.lookupObject("dmfn"), 1.0d);
-        else
-            sparseVector.add(xA.lookupObject("dmfn"), 0.0d);
+        sparseVector.add(xA.lookupObject("dmfn"), (statementsMap.get(personId1, "firstNameDM").equals(
+                statementsMap.get(personId2, "firstNameDM"))) ? 1.0d : 0.0d);
 
-        if (statementsMap.get(personId1, "lastNameDM").equals(
-                statementsMap.get(personId2, "lastNameDM")))
-            sparseVector.add(xA.lookupObject("dmln"), 1.0d);
-        else
-            sparseVector.add(xA.lookupObject("dmln"), 0.0d);
+        sparseVector.add(xA.lookupObject("dmln"), (statementsMap.get(personId1, "lastNameDM").equals(
+                statementsMap.get(personId2, "lastNameDM"))) ? 1.0d : 0.0d);
     }
 
     private void addBeiderMorseFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
@@ -136,10 +126,8 @@ class USHMMClassificationInstanceFactory {
             ));
             firstPersonNormalizedNameBeiderMorseEncodingsSet.retainAll(secondPersonNormalizedNameBeiderMorseEncodingsSet);
 
-            if (firstPersonNormalizedNameBeiderMorseEncodingsSet.size() != 0)
-                sparseVector.add(xA.lookupObject("bm"), 1.0d);
-            else
-                sparseVector.add(xA.lookupObject("bm"), 0.0d);
+            sparseVector.add(xA.lookupObject("bm"),
+                    (firstPersonNormalizedNameBeiderMorseEncodingsSet.size() == 0) ? 0.0d : 1.0d);
         } catch (EncoderException e) {
             logger.warn(String.format(
                     "Beider Morse encoder fail %s %s", firstPersonNormalizedName, secondPersonNormalizedName), e);
@@ -155,10 +143,8 @@ class USHMMClassificationInstanceFactory {
         ));
         firstPersonNormalizedNameDaitchMokotoffEncodingsSet.retainAll(secondPersonNormalizedNameDaitchMokotoffEncodingsSet);
 
-        if (firstPersonNormalizedNameDaitchMokotoffEncodingsSet.size() != 0)
-            sparseVector.add(xA.lookupObject("dms"), 1.0d);
-        else
-            sparseVector.add(xA.lookupObject("dms"), 0.0d);
+        sparseVector.add(xA.lookupObject("dms"),
+                (firstPersonNormalizedNameDaitchMokotoffEncodingsSet.size() == 0) ? 0.0d : 1.0d);
     }
 
     private void addPlaceBirthFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
