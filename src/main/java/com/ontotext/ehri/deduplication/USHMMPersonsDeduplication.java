@@ -10,6 +10,10 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+/**
+ * Train a linear classifier (multithreaded sigmoid perceptron) over the gold standard for the USHMM person deduplication task
+ */
+
 public class USHMMPersonsDeduplication {
 
     public static void main(String[] args) throws Exception {
