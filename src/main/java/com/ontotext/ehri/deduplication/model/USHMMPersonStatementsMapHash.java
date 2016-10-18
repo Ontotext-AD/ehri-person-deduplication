@@ -27,8 +27,15 @@ class USHMMPersonStatementsMapHash {
             "normalizedLastName",
             "normalizedName",
             "dateBirth",
-            "placeBirth"
+            "placeBirth",
+            "nameDM",
+            "firstNameDM",
+            "lastNameDM",
+            "gender",
+            "gender-LinearClass",
+            "gender-RuleBased"
     };
+
     private static final String[] PREDICATES_QUERIES_ARRAY = {
             "?s ushmm:firstName ?o.",
             "?s ushmm:lastName ?o.",
@@ -37,6 +44,12 @@ class USHMMPersonStatementsMapHash {
             "?s onto:normalizedName ?o.",
             "?s ushmm:dateBirth / ushmm:date ?o.",
             "?s ushmm:placeBirth / ushmm:cityTown ?o.",
+            "?s onto:nameDM ?o.",
+            "?s onto:firstNameDM ?o.",
+            "?s onto:lastNameDM ?o.",
+            "?s ushmm:gender ?o.",
+            "?s onto:gender ?g.\n?g rdf:value ?o.\n?g onto:provenance onto:gender-LinearClass.",
+            "?s onto:gender ?g.\n?g rdf:value ?o.\n?g onto:provenance onto:gender-RuleBased."
     };
 
     private static List<String> PREDICATE_NAMES;
@@ -48,7 +61,7 @@ class USHMMPersonStatementsMapHash {
 
     @SuppressWarnings("unchecked")
     USHMMPersonStatementsMapHash(List<USHMMGoldStandardEntry> goldStandard, String personStatementsMapCache) {
-        
+
         PREDICATE_NAMES = Arrays.asList(PREDICATE_NAMES_ARRAY);
         PREDICATES_QUERIES = Arrays.asList(PREDICATES_QUERIES_ARRAY);
         File statementsMapCacheFile = new File(personStatementsMapCache);
@@ -115,7 +128,7 @@ class USHMMPersonStatementsMapHash {
         HashMap<String, String> personStatementsMap = statementsMap.get(person);
         if (personStatementsMap == null)
             personStatementsMap = new HashMap<>();
-        personStatementsMap.put(predicate, getStatementObject(person, predicate));
+        personStatementsMap.put(predicate, getStatementObject(person, predicate).toLowerCase());
         statementsMap.put(person, personStatementsMap);
     }
 
