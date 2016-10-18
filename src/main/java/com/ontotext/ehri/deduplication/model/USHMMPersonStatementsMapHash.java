@@ -12,6 +12,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+/**
+ * An utility class for the hash map containing all necessary predicate values for the persons in the gold standard.
+ * When executing the program for the first time the map is created via executing SPARQL queries to the EHRI endpoint.
+ * After that the map is serialized in a file.
+ */
 
 class USHMMPersonStatementsMapHash {
 
