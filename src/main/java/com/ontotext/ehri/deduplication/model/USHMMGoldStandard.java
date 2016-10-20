@@ -15,7 +15,7 @@ public class USHMMGoldStandard {
 
     public List<ClassificationInstance> getClassificationInstances() {
         List<USHMMGoldStandardEntry> data = USHHMGoldStandardParser.parse(goldStandardTSVInputFile);
-        USHMMClassificationInstanceFactory factory = new USHMMClassificationInstanceFactory();
-        return factory.getClassificationInstances(data, personStatementsMapCache);
+        USHMMPersonsFeatureExtractor featureExtractor = new USHMMPersonsFeatureExtractor();
+        return featureExtractor.getClassificationInstances(data, personStatementsMapCache);
     }
 }

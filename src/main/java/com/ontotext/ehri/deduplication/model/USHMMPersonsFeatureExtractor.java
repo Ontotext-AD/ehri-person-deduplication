@@ -15,9 +15,13 @@ import types.SparseVector;
 import java.util.*;
 import java.util.stream.Collectors;
 
-class USHMMClassificationInstanceFactory {
+/**
+ * Creates list of classification instances from the parsed data.
+ */
 
-    private static final Logger logger = LoggerFactory.getLogger(USHMMClassificationInstanceFactory.class);
+class USHMMPersonsFeatureExtractor {
+
+    private static final Logger logger = LoggerFactory.getLogger(USHMMPersonsFeatureExtractor.class);
 
     private static final String NEGATIVE_CLASS = "NO";
     private static final String POSITIVE_CLASS = "YES";
