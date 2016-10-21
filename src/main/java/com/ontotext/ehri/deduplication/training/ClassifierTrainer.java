@@ -78,12 +78,20 @@ public class ClassifierTrainer {
     }
 
     private LinearClassifier getLinearClassifierFromExperiment(int experiment) {
-        Collections.shuffle(allData);
-        int offsetSplit = (int) (TRAIN_TO_ALL_RATIO * allData.size());
-        List<ClassificationInstance> trainData = allData.subList(0, offsetSplit);
-        List<ClassificationInstance> testData = allData.subList(offsetSplit, allData.size());
+        int splitSize = allData.size() / COUNT_EXPERIMENTS;
+        int offsetSplitLeft = experiment * (splitSize);
+        int offsetSplitRight = (experiment + 1) * (splitSize);
 
+        List<ClassificationInstance> trainData = getTrainData(offsetSplitLeft, offsetSplitRight);
+        List<ClassificationInstance> testData = allData.subList(offsetSplitLeft, offsetSplitRight);
         return trainClassifierAndStoreComputedScores(experiment, trainData, testData);
+    }
+
+    private List<ClassificationInstance> getTrainData(int offsetSplitLeft, int offsetSplitRight) {
+        List<ClassificationInstance> trainData = new ArrayList<>(allData.subList(0, offsetSplitLeft));
+        List<ClassificationInstance> trainRightSide = new ArrayList<>(allData.subList(offsetSplitRight, allData.size()));
+        trainData.addAll(trainRightSide);
+        return trainData;
     }
 
     private LinearClassifier trainClassifierAndStoreComputedScores(int experiment,
