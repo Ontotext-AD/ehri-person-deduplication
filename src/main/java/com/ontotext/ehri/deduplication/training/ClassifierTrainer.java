@@ -21,7 +21,7 @@ public class ClassifierTrainer {
     private static final int PRECISION_OFFSET = 1;
     private static final int RECALL_OFFSET = 2;
 
-    private static final int COUNT_EXPERIMENTS = 10;
+    private static final int COUNT_EXPERIMENTS = 6;
     private static final double TRAIN_TO_ALL_RATIO = 0.9;
 
     private static final int DEFAULT_NUMBER_OF_ITERATIONS = 200;
@@ -78,9 +78,11 @@ public class ClassifierTrainer {
     }
 
     private LinearClassifier getLinearClassifierFromExperiment(int experiment) {
-        int splitSize = allData.size() / COUNT_EXPERIMENTS;
+        int splitSize = (int) Math.floor(0.15 * allData.size());
         int offsetSplitLeft = experiment * (splitSize);
-        int offsetSplitRight = (experiment + 1) * (splitSize);
+        int offsetSplitRight = Math.min(allData.size(), (experiment + 1) * (splitSize));
+
+        System.out.println(experiment + " " + offsetSplitLeft + " " + offsetSplitRight);
 
         List<ClassificationInstance> trainData = getTrainData(offsetSplitLeft, offsetSplitRight);
         List<ClassificationInstance> testData = allData.subList(offsetSplitLeft, offsetSplitRight);
