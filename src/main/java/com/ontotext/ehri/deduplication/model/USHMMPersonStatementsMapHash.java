@@ -33,7 +33,8 @@ class USHMMPersonStatementsMapHash {
             "lastNameDM",
             "gender",
             "gender-LinearClass",
-            "gender-RuleBased"
+            "gender-RuleBased",
+            "source",
     };
 
     private static final String[] PREDICATES_QUERIES_ARRAY = {
@@ -49,7 +50,8 @@ class USHMMPersonStatementsMapHash {
             "?s onto:lastNameDM ?o.",
             "?s ushmm:gender ?o.",
             "?s onto:gender ?g.\n?g rdf:value ?o.\n?g onto:provenance onto:gender-LinearClass.",
-            "?s onto:gender ?g.\n?g rdf:value ?o.\n?g onto:provenance onto:gender-RuleBased."
+            "?s onto:gender ?g.\n?g rdf:value ?o.\n?g onto:provenance onto:gender-RuleBased.",
+            "?source a ushmm:Source; ushmm:documents ?s; ushmm:source ?o.",
     };
 
     private static List<String> PREDICATE_NAMES;

@@ -67,6 +67,7 @@ class USHMMPersonsFeatureExtractor {
         addPlaceBirthFeatures(xA, personId1, personId2, sparseVector);
         addDateBirthFeatures(xA, personId1, personId2, sparseVector);
         addGenderFeature(xA, personId1, personId2, sparseVector);
+        addSourceFeature(xA, personId1, personId2, sparseVector);
         return sparseVector;
 
     }
@@ -179,5 +180,14 @@ class USHMMPersonsFeatureExtractor {
         gendersSetPerson.add(statementsMap.get(personId, "gender-LinearClass"));
         gendersSetPerson.add(statementsMap.get(personId, "gender-RuleBased"));
         return gendersSetPerson;
+    }
+
+    private void addSourceFeature(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
+        List<String> sourcesList = new ArrayList<>();
+        sourcesList.add(statementsMap.get(personId1, "source"));
+        sourcesList.add(statementsMap.get(personId2, "source"));
+        Collections.sort(sourcesList);
+        sparseVector.add(xA.lookupObject("src1_" + sourcesList.get(0)), 1.0d);
+        sparseVector.add(xA.lookupObject("src2_" + sourcesList.get(1)), 1.0d);
     }
 }
