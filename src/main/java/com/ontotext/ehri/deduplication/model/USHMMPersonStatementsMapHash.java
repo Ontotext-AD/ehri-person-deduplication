@@ -1,5 +1,6 @@
 package com.ontotext.ehri.deduplication.model;
 
+import com.ontotext.ehri.deduplication.sparql.QueryResultHandler;
 import com.ontotext.ehri.deduplication.sparql.SPARQLEndpointConfig;
 import com.ontotext.ehri.deduplication.utils.SerializationUtils;
 import org.openrdf.query.*;
@@ -169,31 +170,11 @@ class USHMMPersonStatementsMapHash {
                 "}");
     }
 
-    private static class USHMMQueryResultHandler implements TupleQueryResultHandler {
+    private static class USHMMQueryResultHandler extends QueryResultHandler {
         private Set<String> resultBindingSet;
 
         USHMMQueryResultHandler(Set<String> results) {
             this.resultBindingSet = results;
-        }
-
-        @Override
-        public void handleBoolean(boolean value) throws QueryResultHandlerException {
-
-        }
-
-        @Override
-        public void handleLinks(List<String> linkUrls) throws QueryResultHandlerException {
-
-        }
-
-        @Override
-        public void startQueryResult(List<String> bindingNames) throws TupleQueryResultHandlerException {
-
-        }
-
-        @Override
-        public void endQueryResult() throws TupleQueryResultHandlerException {
-
         }
 
         @Override
