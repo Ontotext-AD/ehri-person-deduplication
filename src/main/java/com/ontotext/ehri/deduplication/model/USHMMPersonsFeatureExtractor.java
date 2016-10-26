@@ -68,6 +68,8 @@ class USHMMPersonsFeatureExtractor {
         addDateBirthFeatures(xA, personId1, personId2, sparseVector);
         addGenderFeature(xA, personId1, personId2, sparseVector);
         addSourceFeature(xA, personId1, personId2, sparseVector);
+        extractPersonTypeFeature(xA, personId1, personId2, sparseVector);
+        extractOccupationFeature(xA, personId1, personId2, sparseVector);
         return sparseVector;
 
     }
@@ -192,4 +194,15 @@ class USHMMPersonsFeatureExtractor {
         sparseVector.add(xA.lookupObject("src1_" + first), 1.0d);
         sparseVector.add(xA.lookupObject("src2_" + second), 1.0d);
     }
+
+    private void extractPersonTypeFeature(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
+        sparseVector.add(xA.lookupObject("pt"),
+                (statementsMap.get(personId1, "personType").equals(statementsMap.get(personId2, "personType"))) ? 0.0d : 1.0d);
+    }
+
+    private void extractOccupationFeature(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
+        sparseVector.add(xA.lookupObject("occ"),
+                (statementsMap.get(personId1, "occupation").equals(statementsMap.get(personId2, "occupation"))) ? 0.0d : 1.0d);
+    }
+
 }
