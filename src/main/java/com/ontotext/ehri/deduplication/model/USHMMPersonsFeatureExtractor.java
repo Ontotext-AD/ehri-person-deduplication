@@ -63,26 +63,26 @@ class USHMMPersonsFeatureExtractor {
 
     private SparseVector getSparseVector(Alphabet xA, String personId1, String personId2) {
         SparseVector sparseVector = new SparseVector();
-        addNamesFeatures(xA, personId1, personId2, sparseVector);
-        addPlaceBirthFeatures(xA, personId1, personId2, sparseVector);
-        addDateBirthFeatures(xA, personId1, personId2, sparseVector);
-        addGenderFeature(xA, personId1, personId2, sparseVector);
-        addSourceFeature(xA, personId1, personId2, sparseVector);
+        extractNamesFeatures(xA, personId1, personId2, sparseVector);
+        extractPlaceBirthFeatures(xA, personId1, personId2, sparseVector);
+        extractDateBirthFeatures(xA, personId1, personId2, sparseVector);
+        extractGenderFeature(xA, personId1, personId2, sparseVector);
+        extractSourceFeature(xA, personId1, personId2, sparseVector);
         extractPersonTypeFeature(xA, personId1, personId2, sparseVector);
         extractOccupationFeature(xA, personId1, personId2, sparseVector);
         return sparseVector;
 
     }
 
-    private void addNamesFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
-        addJaroWinklerNamesFeatures(xA, personId1, personId2, sparseVector);
-        addJaroWinklerNormalizedNamesFeatures(xA, personId1, personId2, sparseVector);
-        addDoubleMetaphoneFeatures(xA, personId1, personId2, sparseVector);
-        addBeiderMorseFeatures(xA, personId1, personId2, sparseVector);
-        addDaitchMokotoffFeatures(xA, personId1, personId2, sparseVector);
+    private void extractNamesFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
+        extractJaroWinklerNamesFeatures(xA, personId1, personId2, sparseVector);
+        extractJaroWinklerNormalizedNamesFeatures(xA, personId1, personId2, sparseVector);
+        extractDoubleMetaphoneFeatures(xA, personId1, personId2, sparseVector);
+        extractBeiderMorseFeatures(xA, personId1, personId2, sparseVector);
+        extractDaitchMokotoffFeatures(xA, personId1, personId2, sparseVector);
     }
 
-    private void addJaroWinklerNamesFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
+    private void extractJaroWinklerNamesFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
         String firstPersonFirstName = statementsMap.get(personId1, "firstName");
         String firstPersonLastName = statementsMap.get(personId1, "lastName");
         String secondPersonFirstName = statementsMap.get(personId2, "firstName");
@@ -95,7 +95,7 @@ class USHMMPersonsFeatureExtractor {
                 secondPersonFirstName + " " + secondPersonLastName));
     }
 
-    private void addJaroWinklerNormalizedNamesFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
+    private void extractJaroWinklerNormalizedNamesFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
         sparseVector.add(xA.lookupObject("jwnf"), JaroWinkler.distance(
                 statementsMap.get(personId1, "normalizedFirstName"),
                 statementsMap.get(personId2, "normalizedFirstName")));
@@ -109,7 +109,7 @@ class USHMMPersonsFeatureExtractor {
                 statementsMap.get(personId2, "normalizedName")));
     }
 
-    private void addDoubleMetaphoneFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
+    private void extractDoubleMetaphoneFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
         sparseVector.add(xA.lookupObject("dmn"), (statementsMap.get(personId1, "nameDM").equals(
                 statementsMap.get(personId2, "nameDM"))) ? 1.0d : 0.0d);
 
@@ -120,7 +120,7 @@ class USHMMPersonsFeatureExtractor {
                 statementsMap.get(personId2, "lastNameDM"))) ? 1.0d : 0.0d);
     }
 
-    private void addBeiderMorseFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
+    private void extractBeiderMorseFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
         String firstPersonNormalizedName = statementsMap.get(personId1, "normalizedName");
         String secondPersonNormalizedName = statementsMap.get(personId2, "normalizedName");
 
@@ -141,7 +141,7 @@ class USHMMPersonsFeatureExtractor {
         }
     }
 
-    private void addDaitchMokotoffFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
+    private void extractDaitchMokotoffFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
         Set<String> firstPersonNormalizedNameDaitchMokotoffEncodingsSet = new HashSet<>(Arrays.asList(
                 daitchMokotoffSoundex.soundex(statementsMap.get(personId1, "normalizedName")).split("|")
         ));
@@ -154,14 +154,14 @@ class USHMMPersonsFeatureExtractor {
                 (firstPersonNormalizedNameDaitchMokotoffEncodingsSet.size() == 0) ? 0.0d : 1.0d);
     }
 
-    private void addPlaceBirthFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
+    private void extractPlaceBirthFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
         sparseVector.add(xA.lookupObject("lpb"), Levenshtein.similarity(
                 statementsMap.get(personId1, "placeBirth"),
                 statementsMap.get(personId2, "placeBirth"))
         );
     }
 
-    private void addDateBirthFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
+    private void extractDateBirthFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
         String dateBirthFirstPerson = statementsMap.get(personId1, "dateBirth");
         String dateBirthSecondPerson = statementsMap.get(personId2, "dateBirth");
 
@@ -169,7 +169,7 @@ class USHMMPersonsFeatureExtractor {
         sparseVector.add(xA.lookupObject("ldb"), Levenshtein.similarity(dateBirthFirstPerson, dateBirthSecondPerson));
     }
 
-    private void addGenderFeature(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
+    private void extractGenderFeature(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
         Set<String> gendersSetFirstPerson = getPersonGenderSet(personId1);
         Set<String> gendersSetSecondPerson = getPersonGenderSet(personId2);
         gendersSetFirstPerson.retainAll(gendersSetSecondPerson);
@@ -184,7 +184,7 @@ class USHMMPersonsFeatureExtractor {
         return gendersSetPerson;
     }
 
-    private void addSourceFeature(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
+    private void extractSourceFeature(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
         String source1 = statementsMap.get(personId1, "sourceId"), source2 = statementsMap.get(personId2, "sourceId");
         String first = source2, second = source1;
         if (source1.compareTo(source2) <= 0) {
