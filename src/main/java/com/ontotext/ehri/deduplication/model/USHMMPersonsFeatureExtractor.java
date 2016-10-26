@@ -183,11 +183,13 @@ class USHMMPersonsFeatureExtractor {
     }
 
     private void addSourceFeature(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
-        List<String> sourcesList = new ArrayList<>();
-        sourcesList.add(statementsMap.get(personId1, "source"));
-        sourcesList.add(statementsMap.get(personId2, "source"));
-        Collections.sort(sourcesList);
-        sparseVector.add(xA.lookupObject("src1_" + sourcesList.get(0)), 1.0d);
-        sparseVector.add(xA.lookupObject("src2_" + sourcesList.get(1)), 1.0d);
+        String source1 = statementsMap.get(personId1, "sourceId"), source2 = statementsMap.get(personId2, "sourceId");
+        String first = source2, second = source1;
+        if (source1.compareTo(source2) <= 0) {
+            first = source1;
+            second = source2;
+        }
+        sparseVector.add(xA.lookupObject("src1_" + first), 1.0d);
+        sparseVector.add(xA.lookupObject("src2_" + second), 1.0d);
     }
 }
