@@ -10,6 +10,20 @@ public class JaroWinklerTest {
     private final double DELTA = 0.001;
 
     @Test
+    public void testJaroWinklerDistanceNullArgument() throws Exception {
+        assertEquals(0.000, JaroWinkler.distance(null, ""), DELTA);
+        assertEquals(0.000, JaroWinkler.distance("", null), DELTA);
+        assertEquals(0.000, JaroWinkler.distance(null, null), DELTA);
+    }
+
+    @Test
+    public void testJaroWinklerDistanceEmptyStringArgument() throws Exception {
+        assertEquals(0.000, JaroWinkler.distance("", "Strauss"), DELTA);
+        assertEquals(0.000, JaroWinkler.distance("Strauss", ""), DELTA);
+        assertEquals(0.000, JaroWinkler.distance("", ""), DELTA);
+    }
+
+    @Test
     public void testJaroWinklerDistance() throws Exception {
 
         assertEquals(1.000, JaroWinkler.distance("MARTHA", "MARTHA"), DELTA);
@@ -19,8 +33,6 @@ public class JaroWinklerTest {
         assertEquals(0.000, JaroWinkler.distance("MARTHA", "DICKSONX"), DELTA);
         assertEquals(0.000, JaroWinkler.distance("Ajke", "( )yko"), DELTA);
         assertEquals(0.000, JaroWinkler.distance("Susskind", "Strauss"), DELTA);
-        assertEquals(0.000, JaroWinkler.distance("", "Strauss"), DELTA);
-        assertEquals(0.000, JaroWinkler.distance("Strauss", ""), DELTA);
 
     }
 }
