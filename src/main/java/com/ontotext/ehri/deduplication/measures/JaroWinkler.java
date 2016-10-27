@@ -21,6 +21,10 @@ public class JaroWinkler {
     }
 
     private static double distance(String s1, String s2, double scalingFactor) {
+
+        if (s1 == null || s2 == null)
+            return 0.0d;
+
         String longer, shorter;
         if (s1.length() > s2.length()) {
             longer = s1.toLowerCase();
