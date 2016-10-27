@@ -64,6 +64,7 @@ class USHMMPersonsFeatureExtractor {
     private SparseVector getSparseVector(Alphabet xA, String personId1, String personId2) {
         SparseVector sparseVector = new SparseVector();
         extractNamesFeatures(xA, personId1, personId2, sparseVector);
+        extractMotherNameFeatures(xA, personId1, personId2, sparseVector);
         extractPlaceBirthFeatures(xA, personId1, personId2, sparseVector);
         extractDateBirthFeatures(xA, personId1, personId2, sparseVector);
         extractGenderFeature(xA, personId1, personId2, sparseVector);
@@ -152,6 +153,13 @@ class USHMMPersonsFeatureExtractor {
 
         sparseVector.add(xA.lookupObject("dms"),
                 (firstPersonNormalizedNameDaitchMokotoffEncodingsSet.size() == 0) ? 0.0d : 1.0d);
+    }
+
+    private void extractMotherNameFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {
+        sparseVector.add(xA.lookupObject("jwnm"), JaroWinkler.distance(
+                statementsMap.get(personId1, "nameMotherFirstName") + " " + statementsMap.get(personId1, "nameMotherLastName"),
+                statementsMap.get(personId2, "nameMotherFirstName") + " " + statementsMap.get(personId2, "nameMotherLastName")
+        ));
     }
 
     private void extractPlaceBirthFeatures(Alphabet xA, String personId1, String personId2, SparseVector sparseVector) {

@@ -34,6 +34,8 @@ class USHMMPersonStatementsMapHash {
             "sourceId",
             "personType",
             "occupation",
+            "nameMotherFirstName",
+            "nameMotherLastName",
     };
 
     private static final String[] PREDICATES_QUERIES_ARRAY = {
@@ -53,6 +55,9 @@ class USHMMPersonStatementsMapHash {
             "?source a ushmm:Source; ushmm:documents ?s; ushmm:sourceId ?o.",
             "?s ushmm:personType ?o.",
             "?s ushmm:occupation ?o.",
+            "?s ushmm:nameMother / ushmm:firstName ?o.",
+            "?s ushmm:nameMother / ushmm:lastName ?o.",
+
     };
 
     private static List<String> PREDICATE_NAMES;
