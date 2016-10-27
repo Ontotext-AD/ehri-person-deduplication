@@ -1,15 +1,12 @@
 package com.ontotext.ehri.deduplication.model;
 
+import com.ontotext.ehri.deduplication.sparql.EndpointConnection;
+import com.ontotext.ehri.deduplication.sparql.QueryResultHandler;
 import com.ontotext.ehri.deduplication.utils.SerializationUtils;
 import org.openrdf.query.*;
-import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.http.HTTPRepository;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -33,7 +30,10 @@ class USHMMPersonStatementsMapHash {
             "lastNameDM",
             "gender",
             "gender-LinearClass",
-            "gender-RuleBased"
+            "gender-RuleBased",
+            "sourceId",
+            "personType",
+            "occupation",
     };
 
     private static final String[] PREDICATES_QUERIES_ARRAY = {
@@ -49,14 +49,15 @@ class USHMMPersonStatementsMapHash {
             "?s onto:lastNameDM ?o.",
             "?s ushmm:gender ?o.",
             "?s onto:gender ?g.\n?g rdf:value ?o.\n?g onto:provenance onto:gender-LinearClass.",
-            "?s onto:gender ?g.\n?g rdf:value ?o.\n?g onto:provenance onto:gender-RuleBased."
+            "?s onto:gender ?g.\n?g rdf:value ?o.\n?g onto:provenance onto:gender-RuleBased.",
+            "?source a ushmm:Source; ushmm:documents ?s; ushmm:sourceId ?o.",
+            "?s ushmm:personType ?o.",
+            "?s ushmm:occupation ?o.",
     };
 
     private static List<String> PREDICATE_NAMES;
     private static List<String> PREDICATES_QUERIES;
 
-    private RepositoryConnection connection;
-    private HTTPRepository repository;
     private Map<String, HashMap<String, String>> statementsMap;
 
     @SuppressWarnings("unchecked")
@@ -70,31 +71,10 @@ class USHMMPersonStatementsMapHash {
                     personStatementsMapCache
             );
         else {
-            openConnection();
-            statementsMap = getMap(goldStandard, personStatementsMapCache);
-            closeConnection();
-        }
-    }
-
-    private void openConnection() {
-        SPARQLEndpointConfig config = new SPARQLEndpointConfig();
-        this.repository = new HTTPRepository(config.repositoryURL);
-        this.repository.setUsernameAndPassword(config.username, config.password);
-        this.connection = null;
-        try {
-            this.connection = repository.getConnection();
-        } catch (RepositoryException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
-
-    private void closeConnection() {
-        try {
+            EndpointConnection connection = new EndpointConnection();
+            connection.open();
+            statementsMap = getMap(goldStandard, personStatementsMapCache, connection);
             connection.close();
-            repository.shutDown();
-        } catch (RepositoryException e) {
-            e.printStackTrace();
         }
     }
 
@@ -102,14 +82,14 @@ class USHMMPersonStatementsMapHash {
         return statementsMap.get(person).get(predicate);
     }
 
-    private Map<String, HashMap<String, String>> getMap(List<USHMMGoldStandardEntry> goldStandard, String personStatementsMapCache) {
+    private Map<String, HashMap<String, String>> getMap(List<USHMMGoldStandardEntry> goldStandard, String personStatementsMapCache, EndpointConnection connection) {
 
         Map<String, HashMap<String, String>> statementsMap = new HashMap<>();
         Set<String> personsSetGoldStandard = getPersonsSetGoldStandard(goldStandard);
 
         for (String person : personsSetGoldStandard)
             for (String predicate : PREDICATE_NAMES)
-                putPropertyInMap(statementsMap, person, predicate);
+                putPropertyInMap(statementsMap, person, predicate, connection);
 
         SerializationUtils.serialize(statementsMap, personStatementsMapCache);
         return statementsMap;
@@ -124,18 +104,18 @@ class USHMMPersonStatementsMapHash {
         return personsGoldStandard;
     }
 
-    private void putPropertyInMap(Map<String, HashMap<String, String>> statementsMap, String person, String predicate) {
+    private void putPropertyInMap(Map<String, HashMap<String, String>> statementsMap, String person, String predicate, EndpointConnection connection) {
         HashMap<String, String> personStatementsMap = statementsMap.get(person);
         if (personStatementsMap == null)
             personStatementsMap = new HashMap<>();
-        personStatementsMap.put(predicate, getStatementObject(person, predicate).toLowerCase());
+        personStatementsMap.put(predicate, getStatementObject(person, predicate, connection).toLowerCase());
         statementsMap.put(person, personStatementsMap);
     }
 
-    private String getStatementObject(String personId, String predicate) {
+    private String getStatementObject(String personId, String predicate, EndpointConnection connection) {
         Set<String> resultBindingSet = new HashSet<>();
         tryToPrepareAndEvaluateQuery(
-                personId, PREDICATES_QUERIES.get(PREDICATE_NAMES.indexOf(predicate)), resultBindingSet
+                personId, PREDICATES_QUERIES.get(PREDICATE_NAMES.indexOf(predicate)), resultBindingSet, connection
         );
         if (resultBindingSet.iterator().hasNext())
             return resultBindingSet.iterator().next();
@@ -143,93 +123,34 @@ class USHMMPersonStatementsMapHash {
             return "";
     }
 
-    private void tryToPrepareAndEvaluateQuery(String personId, String predicate, Set<String> results) {
+    private void tryToPrepareAndEvaluateQuery(String personId, String predicate, Set<String> results, EndpointConnection connection) {
         try {
-            prepareAndEvaluateQuery(personId, predicate, results);
+            prepareAndEvaluateQuery(personId, predicate, results, connection);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
     }
 
-    private void prepareAndEvaluateQuery(String personId, String predicate, Set<String> results)
+    private void prepareAndEvaluateQuery(String personId, String predicate, Set<String> results, EndpointConnection connection)
             throws RepositoryException, MalformedQueryException, QueryEvaluationException, TupleQueryResultHandlerException {
-        TupleQuery query = prepareQuery(personId, predicate);
+        TupleQuery query = connection.getTupleQuery(
+                "PREFIX onto: <http://data.ehri-project.eu/ontotext/>\n" +
+                        "PREFIX ushmm: <http://data.ehri-project.eu/ushmm/ontology/>\n" +
+                        "select ?o where {\n" +
+                        "    ?s a ushmm:Person.\n" +
+                        "    ?s ushmm:personId \"" + personId + "\".\n" +
+                        "    " + predicate + "\n" +
+                        "}"
+        );
         query.evaluate(new USHMMQueryResultHandler(results));
     }
 
-    private TupleQuery prepareQuery(String personId, String predicate) throws RepositoryException, MalformedQueryException {
-        return connection.prepareTupleQuery(QueryLanguage.SPARQL, "" +
-                "PREFIX onto: <http://data.ehri-project.eu/ontotext/>\n" +
-                "PREFIX ushmm: <http://data.ehri-project.eu/ushmm/ontology/>\n" +
-                "select ?o where {\n" +
-                "    ?s a ushmm:Person.\n" +
-                "    ?s ushmm:personId \"" + personId + "\".\n" +
-                "    " + predicate + "\n" +
-                "}");
-    }
-
-    private static class SPARQLEndpointConfig {
-
-        String repositoryURL;
-        String username;
-        String password;
-
-        SPARQLEndpointConfig() {
-            InputStream inputStream = null;
-            try {
-                Properties prop = new Properties();
-                String propFileName = "ehri_sparql_endpoint.properties";
-
-                inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
-
-                if (inputStream != null) {
-                    prop.load(inputStream);
-                } else {
-                    throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
-                }
-
-                repositoryURL = prop.getProperty("ehri.sparql.endpoint.repository.url");
-                username = prop.getProperty("ehri.sparql.endpoint.username");
-                password = prop.getProperty("ehri.sparql.endpoint.password");
-
-            } catch (Exception e) {
-                System.out.println("Exception: " + e);
-            } finally {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private static class USHMMQueryResultHandler implements TupleQueryResultHandler {
+    private static class USHMMQueryResultHandler extends QueryResultHandler {
         private Set<String> resultBindingSet;
 
         USHMMQueryResultHandler(Set<String> results) {
             this.resultBindingSet = results;
-        }
-
-        @Override
-        public void handleBoolean(boolean value) throws QueryResultHandlerException {
-
-        }
-
-        @Override
-        public void handleLinks(List<String> linkUrls) throws QueryResultHandlerException {
-
-        }
-
-        @Override
-        public void startQueryResult(List<String> bindingNames) throws TupleQueryResultHandlerException {
-
-        }
-
-        @Override
-        public void endQueryResult() throws TupleQueryResultHandlerException {
-
         }
 
         @Override
