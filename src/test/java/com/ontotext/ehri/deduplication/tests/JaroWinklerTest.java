@@ -19,6 +19,8 @@ public class JaroWinklerTest {
         assertEquals(0.000, JaroWinkler.distance("MARTHA", "DICKSONX"), DELTA);
         assertEquals(0.000, JaroWinkler.distance("Ajke", "( )yko"), DELTA);
         assertEquals(0.000, JaroWinkler.distance("Susskind", "Strauss"), DELTA);
+        assertEquals(0.000, JaroWinkler.distance("", "Strauss"), DELTA);
+        assertEquals(0.000, JaroWinkler.distance("Strauss", ""), DELTA);
 
     }
 }
