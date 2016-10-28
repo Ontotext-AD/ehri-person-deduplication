@@ -139,7 +139,7 @@ class USHMMPersonStatementsMapHash {
 
     private void prepareAndEvaluateQuery(String personId, String predicate, Set<String> results, EndpointConnection connection)
             throws RepositoryException, MalformedQueryException, QueryEvaluationException, TupleQueryResultHandlerException {
-        TupleQuery query = connection.getTupleQuery(
+        TupleQuery query = connection.prepareSPARQLTupleQuery(
                 "PREFIX onto: <http://data.ehri-project.eu/ontotext/>\n" +
                         "PREFIX ushmm: <http://data.ehri-project.eu/ushmm/ontology/>\n" +
                         "select ?o where {\n" +

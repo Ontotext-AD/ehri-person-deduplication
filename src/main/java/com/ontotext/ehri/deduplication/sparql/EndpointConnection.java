@@ -34,14 +34,11 @@ public class EndpointConnection {
         }
     }
 
-
-    public TupleQuery getTupleQuery(String query) {
+    public TupleQuery prepareSPARQLTupleQuery(String query) {
         TupleQuery tupleQuery = null;
         try {
             tupleQuery = connection.prepareTupleQuery(QueryLanguage.SPARQL, query);
-        } catch (RepositoryException e) {
-            e.printStackTrace();
-        } catch (MalformedQueryException e) {
+        } catch (RepositoryException | MalformedQueryException e) {
             e.printStackTrace();
         }
         return tupleQuery;
