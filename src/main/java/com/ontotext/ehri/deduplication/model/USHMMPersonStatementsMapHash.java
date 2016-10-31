@@ -17,7 +17,7 @@ import java.util.*;
 
 class USHMMPersonStatementsMapHash {
 
-    private static final String[] PREDICATE_NAMES_ARRAY = {
+    static final String[] PREDICATE_NAMES_ARRAY = {
             "firstName",
             "lastName",
             "normalizedFirstName",
