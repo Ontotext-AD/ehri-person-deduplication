@@ -17,22 +17,16 @@ public class Levenshtein {
     private static final int SUBSTITUTION_COST = 1;
 
     public static double similarity(String s, String t) {
-        if (isEmptyString(s) && isEmptyString(t))
-            return 1 - distance(s, t);
+        if (s.isEmpty() && t.isEmpty())
+            return 0;
         else
             return 1 - (distance(s, t) / (double) Math.max(s.length(), t.length()));
     }
 
     public static int distance(String s, String t) {
-        if (isEmptyString(s))
-            return t.length();
-        if (isEmptyString(t))
-            return s.length();
+        if (s.isEmpty() || t.isEmpty())
+            return Math.max(s.length(), t.length());
         return calculateDistance(s, t);
-    }
-
-    private static boolean isEmptyString(String s) {
-        return s.length() == 0;
     }
 
     private static int calculateDistance(String s, String t) {
