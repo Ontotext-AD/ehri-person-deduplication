@@ -1,4 +1,4 @@
-package com.ontotext.ehri.deduplication.training;
+package com.ontotext.ehri.deduplication.classifier;
 
 import classification.algorithms.MultithreadedSigmoidPerceptron;
 import classification.functions.CompleteFeatureFunction;

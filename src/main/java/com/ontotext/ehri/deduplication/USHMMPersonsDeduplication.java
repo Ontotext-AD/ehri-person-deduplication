@@ -1,7 +1,7 @@
 package com.ontotext.ehri.deduplication;
 
 import com.ontotext.ehri.deduplication.model.USHMMGoldStandard;
-import com.ontotext.ehri.deduplication.training.ClassifierTrainer;
+import com.ontotext.ehri.deduplication.classifier.ClassifierTrainer;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
