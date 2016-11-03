@@ -1,7 +1,7 @@
 package com.ontotext.ehri.deduplication;
 
-import com.ontotext.ehri.deduplication.model.USHMMGoldStandard;
 import com.ontotext.ehri.deduplication.classifier.ClassifierTrainer;
+import com.ontotext.ehri.deduplication.model.USHMMGoldStandard;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
@@ -60,10 +60,7 @@ public class USHMMPersonsDeduplication {
         USHMMGoldStandard goldStandard = new USHMMGoldStandard(
                 goldStandardTSVInputFile, personStatementsMapCache
         );
-        ClassifierTrainer classifierTrainer = new ClassifierTrainer(
-                goldStandard.getClassificationInstances(),
-                goldStandard.getClassificationInstanceUSHMMPersonPairMap()
-        );
+        ClassifierTrainer classifierTrainer = new ClassifierTrainer(goldStandard.getClassificationInstanceUSHMMPersonPairMap());
         classifierTrainer.trainAndSaveModel(resultsTsvFilepath, modelFilepath);
     }
 

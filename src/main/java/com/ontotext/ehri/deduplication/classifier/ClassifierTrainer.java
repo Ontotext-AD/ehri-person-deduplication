@@ -49,10 +49,9 @@ public class ClassifierTrainer {
     private Map<Integer, double[]> perExperimentScores;
     private Map<String, double[][]> perLabelScores;
 
-    public ClassifierTrainer(List<ClassificationInstance> allData,
-                             Map<ClassificationInstance, USHMMPersonPair> classificationInstanceUSHMMPersonPairMap) {
+    public ClassifierTrainer(Map<ClassificationInstance, USHMMPersonPair> classificationInstanceUSHMMPersonPairMap) {
 
-        this.allData = allData;
+        this.allData = new ArrayList<>(classificationInstanceUSHMMPersonPairMap.keySet());
         this.classificationInstanceUSHMMPersonPairMap = classificationInstanceUSHMMPersonPairMap;
 
         getAlphabetsAndStopGrowth();
