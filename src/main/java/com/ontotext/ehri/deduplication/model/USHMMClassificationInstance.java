@@ -1,11 +1,11 @@
 package com.ontotext.ehri.deduplication.model;
 
-import com.ontotext.ehri.deduplication.measures.JaroWinkler;
 import com.ontotext.ehri.deduplication.measures.Levenshtein;
 import com.ontotext.ehri.deduplication.measures.USHMMDate;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.language.DaitchMokotoffSoundex;
 import org.apache.commons.codec.language.bm.BeiderMorseEncoder;
+import org.simmetrics.metrics.JaroWinkler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import types.Alphabet;
@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class USHMMClassificationInstance {
+class USHMMClassificationInstance {
 
     private Alphabet xA;
     private SparseVector sparseVector;
@@ -23,12 +23,13 @@ public class USHMMClassificationInstance {
     private USHMMPerson person1;
     private USHMMPerson person2;
 
+    private static final JaroWinkler jaroWinkler = new JaroWinkler();
     private static final DaitchMokotoffSoundex daitchMokotoffSoundex = new DaitchMokotoffSoundex();
     private static final BeiderMorseEncoder beiderMorseEncoder = new BeiderMorseEncoder();
 
     private static final Logger logger = LoggerFactory.getLogger(USHMMPersonsFeatureExtractor.class);
 
-    public USHMMClassificationInstance(Alphabet xA, USHMMPerson person1, USHMMPerson person2) {
+    USHMMClassificationInstance(Alphabet xA, USHMMPerson person1, USHMMPerson person2) {
         this.xA = xA;
         this.sparseVector = new SparseVector();
 
@@ -36,7 +37,7 @@ public class USHMMClassificationInstance {
         this.person2 = person2;
     }
 
-    public SparseVector getSparseVector() {
+    SparseVector getSparseVector() {
         extractNamesFeatures();
         extractMotherNameFeatures();
         extractPlaceBirthFeatures();
@@ -57,17 +58,17 @@ public class USHMMClassificationInstance {
     }
 
     private void extractJaroWinklerNamesFeatures() {
-        sparseVector.add(xA.lookupObject("jwf"), JaroWinkler.distance(person1.firstName, person2.firstName));
-        sparseVector.add(xA.lookupObject("jwl"), JaroWinkler.distance(person1.lastName, person2.lastName));
+        sparseVector.add(xA.lookupObject("jwf"), jaroWinkler.compare(person1.firstName, person2.firstName));
+        sparseVector.add(xA.lookupObject("jwl"), jaroWinkler.compare(person1.lastName, person2.lastName));
 
-        sparseVector.add(xA.lookupObject("jw"), JaroWinkler.distance(person1.firstName + " " + person1.lastName,
+        sparseVector.add(xA.lookupObject("jw"), jaroWinkler.compare(person1.firstName + " " + person1.lastName,
                 person2.firstName + " " + person2.lastName));
     }
 
     private void extractJaroWinklerNormalizedNamesFeatures() {
-        sparseVector.add(xA.lookupObject("jwnf"), JaroWinkler.distance(person1.normalizedFirstName, person2.normalizedFirstName));
-        sparseVector.add(xA.lookupObject("jwnl"), JaroWinkler.distance(person1.normalizedLastName, person2.normalizedLastName));
-        sparseVector.add(xA.lookupObject("jwn"), JaroWinkler.distance(person1.normalizedName, person2.normalizedName));
+        sparseVector.add(xA.lookupObject("jwnf"), jaroWinkler.compare(person1.normalizedFirstName, person2.normalizedFirstName));
+        sparseVector.add(xA.lookupObject("jwnl"), jaroWinkler.compare(person1.normalizedLastName, person2.normalizedLastName));
+        sparseVector.add(xA.lookupObject("jwn"), jaroWinkler.compare(person1.normalizedName, person2.normalizedName));
     }
 
     private void extractDoubleMetaphoneFeatures() {
@@ -109,7 +110,7 @@ public class USHMMClassificationInstance {
     }
 
     private void extractMotherNameFeatures() {
-        sparseVector.add(xA.lookupObject("jwnm"), JaroWinkler.distance(
+        sparseVector.add(xA.lookupObject("jwnm"), jaroWinkler.compare(
                 person1.nameMotherFirstName + " " + person1.nameMotherLastName,
                 person1.nameMotherFirstName + " " + person1.nameMotherLastName
         ));
