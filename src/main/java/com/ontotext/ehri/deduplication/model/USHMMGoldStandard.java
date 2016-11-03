@@ -3,8 +3,10 @@ package com.ontotext.ehri.deduplication.model;
 import types.ClassificationInstance;
 
 import java.util.List;
+import java.util.Map;
 
 public class USHMMGoldStandard {
+
     private String goldStandardTSVInputFile;
     private String personStatementsMapCache;
 
@@ -13,9 +15,9 @@ public class USHMMGoldStandard {
         this.personStatementsMapCache = personStatementsMapCache;
     }
 
-    public List<ClassificationInstance> getClassificationInstances() {
+    public Map<ClassificationInstance, USHMMPersonPair> getClassificationInstanceUSHMMPersonPairMap() {
         List<USHMMGoldStandardEntry> data = USHHMGoldStandardParser.parse(goldStandardTSVInputFile);
         USHMMPersonsFeatureExtractor featureExtractor = new USHMMPersonsFeatureExtractor();
-        return featureExtractor.getClassificationInstances(data, personStatementsMapCache);
+        return featureExtractor.getClassificationInstanceUSHMMPersonPairMap(data, personStatementsMapCache);
     }
 }

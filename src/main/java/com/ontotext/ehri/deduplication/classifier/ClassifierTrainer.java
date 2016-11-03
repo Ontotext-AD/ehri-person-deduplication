@@ -2,6 +2,7 @@ package com.ontotext.ehri.deduplication.classifier;
 
 import classification.algorithms.MultithreadedSigmoidPerceptron;
 import classification.functions.CompleteFeatureFunction;
+import com.ontotext.ehri.deduplication.model.USHMMPersonPair;
 import org.apache.log4j.Logger;
 import types.Alphabet;
 import types.ClassificationInstance;
@@ -43,13 +44,15 @@ public class ClassifierTrainer {
     private Alphabet xA;
     private Alphabet yA;
     private List<ClassificationInstance> allData;
+    private static Map<ClassificationInstance, USHMMPersonPair> classificationInstanceUSHMMPersonPairMap;
 
     private Map<Integer, double[]> perExperimentScores;
     private Map<String, double[][]> perLabelScores;
 
-    public ClassifierTrainer(List<ClassificationInstance> allData) {
+    public ClassifierTrainer(Map<ClassificationInstance, USHMMPersonPair> classificationInstanceUSHMMPersonPairMap) {
 
-        this.allData = allData;
+        this.allData = new ArrayList<>(classificationInstanceUSHMMPersonPairMap.keySet());
+        this.classificationInstanceUSHMMPersonPairMap = classificationInstanceUSHMMPersonPairMap;
 
         getAlphabetsAndStopGrowth();
         initializeScoresMaps();
@@ -182,6 +185,7 @@ public class ClassifierTrainer {
             sparseVector += (h.getxAlphabet().lookupInt(inst.x.getIndexAt(i)) + " : " + inst.x.getValueAt(i) + " ");
         LOG.info("False class : " + yA.lookupInt(h.label(inst.x)) + " True class : " + yA.lookupInt(inst.y));
         LOG.info(sparseVector);
+        LOG.info(classificationInstanceUSHMMPersonPairMap.get(inst));
     }
 
     private static double[] computeMicroMeasures(int[] tpInClass, int[] fpInClass, int[] fnInClass) {

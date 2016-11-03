@@ -3,7 +3,7 @@ package com.ontotext.ehri.deduplication.model;
 import java.util.ArrayList;
 import java.util.List;
 
-class USHMMPersonPair {
+public class USHMMPersonPair {
 
     private String personId1;
     private String personId2;
@@ -30,4 +30,17 @@ class USHMMPersonPair {
         return new USHMMPerson(args.toArray(new String[0]));
     }
 
+    @Override
+    public String toString() {
+        String result = toStringPerson(personId1);
+        result += toStringPerson(personId2);
+        return result;
+    }
+
+    private String toStringPerson(String personId) {
+        String result = "personId : " + personId + " ";
+        for (String predicate : USHMMPersonStatementsMapHash.PREDICATE_NAMES_ARRAY)
+            result +=  predicate + " : " + statementsMap.get(personId, predicate) + " ";
+        return result;
+    }
 }
