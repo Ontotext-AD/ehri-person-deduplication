@@ -171,14 +171,17 @@ public class ClassifierTrainer {
     }
 
     private static void outputFalseInstances(LinearClassifier h, List<ClassificationInstance> falseInstances) {
-        Set<Integer> indices = new TreeSet<>();
-        for (ClassificationInstance inst : falseInstances) {
-            LOG.info(inst);
-            for (int i = 0; i < inst.x.indices.size(); ++i)
-                indices.add(inst.x.getIndexAt(i));
-        }
-        for (Integer index : indices)
-            LOG.info(index + " : " + h.getxAlphabet().lookupInt(index));
+        for (ClassificationInstance inst : falseInstances)
+            outputInstance(h, inst);
+    }
+
+    private static void outputInstance(LinearClassifier h, ClassificationInstance inst) {
+        Alphabet yA = h.getyAlphabet();
+        String sparseVector = "";
+        for (int i = 0; i < inst.x.indices.size(); ++i)
+            sparseVector += (h.getxAlphabet().lookupInt(inst.x.getIndexAt(i)) + " : " + inst.x.getValueAt(i) + " ");
+        LOG.info("False class : " + yA.lookupInt(h.label(inst.x)) + " True class : " + yA.lookupInt(inst.y));
+        LOG.info(sparseVector);
     }
 
     private static double[] computeMicroMeasures(int[] tpInClass, int[] fpInClass, int[] fnInClass) {
