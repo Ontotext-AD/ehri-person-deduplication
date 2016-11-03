@@ -134,10 +134,15 @@ class USHMMClassificationInstance {
 
     private Set<String> getPersonGenderSet(USHMMPerson person) {
         Set<String> gendersSetPerson = new HashSet<>();
-        gendersSetPerson.add(person.gender);
-        gendersSetPerson.add(person.genderLinearClass);
-        gendersSetPerson.add(person.genderRuleBased);
+        addGenderIfGenderIsNotEmptyString(gendersSetPerson, person.gender);
+        addGenderIfGenderIsNotEmptyString(gendersSetPerson, person.genderLinearClass);
+        addGenderIfGenderIsNotEmptyString(gendersSetPerson, person.genderRuleBased);
         return gendersSetPerson;
+    }
+
+    private void addGenderIfGenderIsNotEmptyString(Set<String> gendersSetPerson, String gender) {
+        if (!gender.isEmpty())
+            gendersSetPerson.add(gender);
     }
 
     private void extractSourceFeature() {
