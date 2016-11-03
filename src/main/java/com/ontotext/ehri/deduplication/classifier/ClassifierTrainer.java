@@ -140,7 +140,8 @@ public class ClassifierTrainer {
         int[] totalsInClass = new int[classCount];
         int[] confusionMatrix = new int[classCount * classCount];
 
-        computeTpFpFn(h, data, tpInClass, fpInClass, fnInClass, totalsInClass, confusionMatrix);
+        List<ClassificationInstance> falseInstances = computeTpFpFn(h, data, tpInClass, fpInClass, fnInClass, totalsInClass, confusionMatrix);
+        outputFalseInstances(h, falseInstances);
         double[] micro = computeMicroMeasures(tpInClass, fpInClass, fnInClass);
         double[] accumulated = {0.0D, 0.0D, 0.0D};
         Map<Integer, double[]> perClassResults = computeResultsPerClass(h, tpInClass, fpInClass, fnInClass, accumulated);
@@ -151,19 +152,33 @@ public class ClassifierTrainer {
         return storeComputedMeasures(macro, micro, perClassResults, classCount);
     }
 
-    private static void computeTpFpFn(LinearClassifier h, List<ClassificationInstance> data, int[] tpInClass, int[] fpInClass, int[] fnInClass,
-                                      int[] totalsInClass, int[] confusionMatrix) {
+    private static List<ClassificationInstance> computeTpFpFn(LinearClassifier h, List<ClassificationInstance> data, int[] tpInClass, int[] fpInClass, int[] fnInClass,
+                                                              int[] totalsInClass, int[] confusionMatrix) {
+        List<ClassificationInstance> falseInstances = new ArrayList<>();
         for (ClassificationInstance inst : data) {
             int label = h.label(inst.x);
             ++totalsInClass[inst.y];
             if (label == inst.y) {
                 ++tpInClass[inst.y];
             } else {
+                falseInstances.add(inst);
                 ++fpInClass[label];
                 ++fnInClass[inst.y];
             }
             ++confusionMatrix[inst.y * h.getyAlphabet().size() + label];
         }
+        return falseInstances;
+    }
+
+    private static void outputFalseInstances(LinearClassifier h, List<ClassificationInstance> falseInstances) {
+        Set<Integer> indices = new TreeSet<>();
+        for (ClassificationInstance inst : falseInstances) {
+            LOG.info(inst);
+            for (int i = 0; i < inst.x.indices.size(); ++i)
+                indices.add(inst.x.getIndexAt(i));
+        }
+        for (Integer index : indices)
+            LOG.info(index + " : " + h.getxAlphabet().lookupInt(index));
     }
 
     private static double[] computeMicroMeasures(int[] tpInClass, int[] fpInClass, int[] fnInClass) {
