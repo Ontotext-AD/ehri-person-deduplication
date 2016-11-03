@@ -60,7 +60,10 @@ public class USHMMPersonsDeduplication {
         USHMMGoldStandard goldStandard = new USHMMGoldStandard(
                 goldStandardTSVInputFile, personStatementsMapCache
         );
-        ClassifierTrainer classifierTrainer = new ClassifierTrainer(goldStandard.getClassificationInstances());
+        ClassifierTrainer classifierTrainer = new ClassifierTrainer(
+                goldStandard.getClassificationInstances(),
+                goldStandard.getClassificationInstanceUSHMMPersonPairMap()
+        );
         classifierTrainer.trainAndSaveModel(resultsTsvFilepath, modelFilepath);
     }
 
