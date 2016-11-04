@@ -31,8 +31,6 @@ public class USHMMDate {
     private static final int SAME_DAYS_WEIGHT = 1;
 
     public static double similarity(String date1, String date2) {
-        if (date1.isEmpty() || date2.isEmpty())
-            return 0.0d;
         date1 = addLeadingZeros(date1);
         date2 = addLeadingZeros(date2);
         return calculateNormalizedSimilarityScore(date1, date2);

@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-class USHMMClassificationInstance {
+public class USHMMClassificationInstance {
 
     private Alphabet xA;
     private SparseVector sparseVector;
@@ -29,7 +29,7 @@ class USHMMClassificationInstance {
 
     private static final Logger logger = LoggerFactory.getLogger(USHMMPersonsFeatureExtractor.class);
 
-    USHMMClassificationInstance(Alphabet xA, USHMMPerson person1, USHMMPerson person2) {
+    public USHMMClassificationInstance(Alphabet xA, USHMMPerson person1, USHMMPerson person2) {
         this.xA = xA;
         this.sparseVector = new SparseVector();
 
@@ -37,7 +37,7 @@ class USHMMClassificationInstance {
         this.person2 = person2;
     }
 
-    SparseVector getSparseVector() {
+    public SparseVector getSparseVector() {
         extractNamesFeatures();
         extractMotherNameFeatures();
         extractPlaceBirthFeatures();
@@ -49,6 +49,43 @@ class USHMMClassificationInstance {
         return sparseVector;
     }
 
+    private void addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank(final String featurePrefix, String s1, String s2) {
+        String string1 = s1.trim(), string2 = s2.trim();
+        if (!string1.isEmpty() || !string2.isEmpty())
+            sparseVector.add(xA.lookupObject(featurePrefix), jaroWinkler.compare(string1, string2));
+    }
+
+    private void addLevenshteinSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank(final String featurePrefix, String s1, String s2) {
+        String string1 = s1.trim(), string2 = s2.trim();
+        if (!string1.isEmpty() || !string2.isEmpty())
+            sparseVector.add(xA.lookupObject(featurePrefix), Levenshtein.similarity(string1, string2));
+    }
+
+    private void addUSHMMDateSimilarityIfBothStringAreNotBlank(final String featurePrefix, String s1, String s2) {
+        String string1 = s1.trim(), string2 = s2.trim();
+        if (!string1.isEmpty() && !string2.isEmpty())
+            sparseVector.add(xA.lookupObject(featurePrefix), USHMMDate.similarity(string1, string2));
+    }
+
+    private void addFeatureTwoNotBlankStringsMatch(final String featurePrefix, String s1, String s2) {
+        if (!s1.trim().isEmpty())
+            sparseVector.add(xA.lookupObject(featurePrefix), s1.equals(s2) ? 1.0d : 0.0d);
+    }
+
+    private void addFeatureSetIsNotEmpty(final String featurePrefix, Set set) {
+        if (!set.isEmpty())
+            sparseVector.add(xA.lookupObject(featurePrefix), 1.0d);
+    }
+
+    private void addStringFeature(final String featurePrefix) {
+        sparseVector.add(xA.lookupObject(featurePrefix), 1.0d);
+    }
+
+    private void addStringToSetIfStringIsNotBlank(Set<String> set, String string) {
+        if (!string.trim().isEmpty())
+            set.add(string);
+    }
+
     private void extractNamesFeatures() {
         extractJaroWinklerNamesFeatures();
         extractJaroWinklerNormalizedNamesFeatures();
@@ -58,23 +95,21 @@ class USHMMClassificationInstance {
     }
 
     private void extractJaroWinklerNamesFeatures() {
-        sparseVector.add(xA.lookupObject("jwf"), jaroWinkler.compare(person1.firstName, person2.firstName));
-        sparseVector.add(xA.lookupObject("jwl"), jaroWinkler.compare(person1.lastName, person2.lastName));
-
-        sparseVector.add(xA.lookupObject("jw"), jaroWinkler.compare(person1.firstName + " " + person1.lastName,
-                person2.firstName + " " + person2.lastName));
+        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jwf", person1.firstName, person2.firstName);
+        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jwl", person1.lastName, person2.lastName);
+        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jw", person1.firstName + " " + person1.lastName, person2.firstName + " " + person2.lastName);
     }
 
     private void extractJaroWinklerNormalizedNamesFeatures() {
-        sparseVector.add(xA.lookupObject("jwnf"), jaroWinkler.compare(person1.normalizedFirstName, person2.normalizedFirstName));
-        sparseVector.add(xA.lookupObject("jwnl"), jaroWinkler.compare(person1.normalizedLastName, person2.normalizedLastName));
-        sparseVector.add(xA.lookupObject("jwn"), jaroWinkler.compare(person1.normalizedName, person2.normalizedName));
+        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jwnf", person1.normalizedFirstName, person2.normalizedFirstName);
+        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jwnl", person1.normalizedLastName, person2.normalizedLastName);
+        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jwn", person1.normalizedName, person2.normalizedName);
     }
 
     private void extractDoubleMetaphoneFeatures() {
-        sparseVector.add(xA.lookupObject("dmn"), person1.nameDM.equals(person2.nameDM) ? 1.0d : 0.0d);
-        sparseVector.add(xA.lookupObject("dmfn"), (person1.firstNameDM.equals(person2.firstNameDM)) ? 1.0d : 0.0d);
-        sparseVector.add(xA.lookupObject("dmln"), (person1.lastNameDM.equals(person2.lastNameDM)) ? 1.0d : 0.0d);
+        addFeatureTwoNotBlankStringsMatch("dmfn", person1.firstNameDM, person2.firstNameDM);
+        addFeatureTwoNotBlankStringsMatch("dmln", person1.lastNameDM, person2.lastNameDM);
+        addFeatureTwoNotBlankStringsMatch("dmn", person1.nameDM, person2.nameDM);
     }
 
     private void extractBeiderMorseFeatures() {
@@ -90,7 +125,7 @@ class USHMMClassificationInstance {
             ));
             firstPersonNormalizedNameBeiderMorseEncodingsSet.retainAll(secondPersonNormalizedNameBeiderMorseEncodingsSet);
 
-            sparseVector.add(xA.lookupObject("bm"), (firstPersonNormalizedNameBeiderMorseEncodingsSet.size() == 0) ? 0.0d : 1.0d);
+            addFeatureSetIsNotEmpty("bm", firstPersonNormalizedNameBeiderMorseEncodingsSet);
         } catch (EncoderException e) {
             logger.warn(String.format(
                     "Beider Morse encoder fail %s %s", firstPersonNormalizedName, secondPersonNormalizedName), e);
@@ -106,43 +141,35 @@ class USHMMClassificationInstance {
         ));
         firstPersonNormalizedNameDaitchMokotoffEncodingsSet.retainAll(secondPersonNormalizedNameDaitchMokotoffEncodingsSet);
 
-        sparseVector.add(xA.lookupObject("dms"), (firstPersonNormalizedNameDaitchMokotoffEncodingsSet.size() == 0) ? 0.0d : 1.0d);
+        addFeatureSetIsNotEmpty("dms", firstPersonNormalizedNameDaitchMokotoffEncodingsSet);
     }
 
     private void extractMotherNameFeatures() {
-        sparseVector.add(xA.lookupObject("jwnm"), jaroWinkler.compare(
-                person1.nameMotherFirstName + " " + person1.nameMotherLastName,
-                person1.nameMotherFirstName + " " + person1.nameMotherLastName
-        ));
+        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jwnm", person1.nameMotherFirstName + " " + person1.nameMotherLastName, person2.nameMotherFirstName + " " + person2.nameMotherLastName);
     }
 
     private void extractPlaceBirthFeatures() {
-        sparseVector.add(xA.lookupObject("lpb"), Levenshtein.similarity(person1.placeBirth, person2.placeBirth));
+        addLevenshteinSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("lpb", person1.placeBirth, person2.placeBirth);
     }
 
     private void extractDateBirthFeatures() {
-        sparseVector.add(xA.lookupObject("db"), USHMMDate.similarity(person1.dateBirth, person2.dateBirth));
-        sparseVector.add(xA.lookupObject("ldb"), Levenshtein.similarity(person1.dateBirth, person2.dateBirth));
+        addUSHMMDateSimilarityIfBothStringAreNotBlank("db", person1.dateBirth, person2.dateBirth);
+        addLevenshteinSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("ldb", person1.dateBirth, person2.dateBirth);
     }
 
     private void extractGenderFeature() {
         Set<String> gendersSetFirstPerson = getPersonGenderSet(person1);
         Set<String> gendersSetSecondPerson = getPersonGenderSet(person2);
         gendersSetFirstPerson.retainAll(gendersSetSecondPerson);
-        sparseVector.add(xA.lookupObject("g"), (gendersSetFirstPerson.size() == 0) ? 0.0d : 1.0d);
+        addFeatureSetIsNotEmpty("g", gendersSetFirstPerson);
     }
 
     private Set<String> getPersonGenderSet(USHMMPerson person) {
         Set<String> gendersSetPerson = new HashSet<>();
-        addGenderIfGenderIsNotEmptyString(gendersSetPerson, person.gender);
-        addGenderIfGenderIsNotEmptyString(gendersSetPerson, person.genderLinearClass);
-        addGenderIfGenderIsNotEmptyString(gendersSetPerson, person.genderRuleBased);
+        addStringToSetIfStringIsNotBlank(gendersSetPerson, person.gender);
+        addStringToSetIfStringIsNotBlank(gendersSetPerson, person.genderLinearClass);
+        addStringToSetIfStringIsNotBlank(gendersSetPerson, person.genderRuleBased);
         return gendersSetPerson;
-    }
-
-    private void addGenderIfGenderIsNotEmptyString(Set<String> gendersSetPerson, String gender) {
-        if (!gender.isEmpty())
-            gendersSetPerson.add(gender);
     }
 
     private void extractSourceFeature() {
@@ -152,16 +179,16 @@ class USHMMClassificationInstance {
             first = source1;
             second = source2;
         }
-        sparseVector.add(xA.lookupObject("src1_" + first), 1.0d);
-        sparseVector.add(xA.lookupObject("src2_" + second), 1.0d);
+        addStringFeature("src1_" + first);
+        addStringFeature("src2_" + second);
     }
 
     private void extractPersonTypeFeature() {
-        sparseVector.add(xA.lookupObject("pt"), (person1.personType.equals(person2.personType)) ? 0.0d : 1.0d);
+        addFeatureTwoNotBlankStringsMatch("pt", person1.personType, person2.personType);
     }
 
     private void extractOccupationFeature() {
-        sparseVector.add(xA.lookupObject("occ"), (person1.occupation.equals(person2.occupation)) ? 0.0d : 1.0d);
+        addFeatureTwoNotBlankStringsMatch("occ", person1.occupation, person2.occupation);
     }
 
 }
