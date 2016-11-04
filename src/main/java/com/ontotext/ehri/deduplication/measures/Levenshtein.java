@@ -18,7 +18,7 @@ public class Levenshtein {
 
     public static double similarity(String s, String t) {
         if (s.isEmpty() && t.isEmpty())
-            return 0;
+            return 1;
         else
             return 1 - (distance(s, t) / (double) Math.max(s.length(), t.length()));
     }
