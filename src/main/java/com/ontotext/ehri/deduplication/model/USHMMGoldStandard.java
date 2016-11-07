@@ -1,5 +1,6 @@
 package com.ontotext.ehri.deduplication.model;
 
+import javafx.util.Pair;
 import types.ClassificationInstance;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public class USHMMGoldStandard {
         this.personStatementsMapCache = personStatementsMapCache;
     }
 
-    public Map<ClassificationInstance, USHMMPersonPair> getClassificationInstanceUSHMMPersonPairMap() {
+    public Map<ClassificationInstance, Pair<USHMMPerson, USHMMPerson>> getClassificationInstanceUSHMMPersonPairMap() {
         List<USHMMGoldStandardEntry> data = USHHMGoldStandardParser.parse(goldStandardTSVInputFile);
         USHMMPersonsFeatureExtractor featureExtractor = new USHMMPersonsFeatureExtractor();
         return featureExtractor.getClassificationInstanceUSHMMPersonPairMap(data, personStatementsMapCache);

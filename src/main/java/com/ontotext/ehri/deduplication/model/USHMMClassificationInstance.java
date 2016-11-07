@@ -55,16 +55,46 @@ public class USHMMClassificationInstance {
             sparseVector.add(xA.lookupObject(featurePrefix), jaroWinkler.compare(string1, string2));
     }
 
-    private void addLevenshteinSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank(final String featurePrefix, String s1, String s2) {
-        String string1 = s1.trim(), string2 = s2.trim();
-        if (!string1.isEmpty() || !string2.isEmpty())
-            sparseVector.add(xA.lookupObject(featurePrefix), Levenshtein.similarity(string1, string2));
+    private void addLevenshteinSimilarityFeatureBetweenTwoSets(final String featurePrefix, Set<String> set1, Set<String> set2) {
+        double minimum = Double.MAX_VALUE;
+
+        for (String s1: set1)
+            for (String s2: set2)
+                minimum = getLevenshteinSimilarityMinimum(minimum, s1, s2);
+
+        if (minimum != Double.MAX_VALUE)
+            sparseVector.add(xA.lookupObject(featurePrefix), minimum);
     }
 
-    private void addUSHMMDateSimilarityIfBothStringAreNotBlank(final String featurePrefix, String s1, String s2) {
+    private double getLevenshteinSimilarityMinimum(double minimum, String s1, String s2) {
         String string1 = s1.trim(), string2 = s2.trim();
-        if (!string1.isEmpty() && !string2.isEmpty())
-            sparseVector.add(xA.lookupObject(featurePrefix), USHMMDate.similarity(string1, string2));
+        if (!string1.isEmpty() || !string2.isEmpty()) {
+            double similarity = Levenshtein.similarity(string1, string2);
+            if (similarity < minimum)
+                minimum = similarity;
+        }
+        return minimum;
+    }
+
+    private void addUSHMMDateSimilarityFeatureBetweenTwoSets(final String featurePrefix, Set<String> set1, Set<String> set2) {
+        double minimum = Double.MAX_VALUE;
+
+        for (String s1: set1)
+            for (String s2: set2)
+                minimum = getUSHMMDateSimilarityMinimum(minimum, s1, s2);
+
+        if (minimum != Double.MAX_VALUE)
+            sparseVector.add(xA.lookupObject(featurePrefix), minimum);
+    }
+
+    private double getUSHMMDateSimilarityMinimum(double minimum, String s1, String s2) {
+        String string1 = s1.trim(), string2 = s2.trim();
+        if (!string1.isEmpty() && !string2.isEmpty()) {
+            double similarity = USHMMDate.similarity(string1, string2);
+            if (similarity < minimum)
+                minimum = similarity;
+        }
+        return minimum;
     }
 
     private void addFeatureTwoNotBlankStringsMatch(final String featurePrefix, String s1, String s2) {
@@ -95,26 +125,62 @@ public class USHMMClassificationInstance {
     }
 
     private void extractJaroWinklerNamesFeatures() {
-        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jwf", person1.firstName, person2.firstName);
-        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jwl", person1.lastName, person2.lastName);
-        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jw", person1.firstName + " " + person1.lastName, person2.firstName + " " + person2.lastName);
+        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank(
+                "jwf",
+                person1.getStringValue("firstName"),
+                person2.getStringValue("firstName")
+        );
+        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank(
+                "jwl",
+                person1.getStringValue("lastName"),
+                person2.getStringValue("lastName")
+        );
+        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank(
+                "jw",
+                person1.getStringValue("firstName") + " " + person1.getStringValue("lastName"),
+                person2.getStringValue("firstName") + " " + person2.getStringValue("lastName")
+        );
     }
 
     private void extractJaroWinklerNormalizedNamesFeatures() {
-        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jwnf", person1.normalizedFirstName, person2.normalizedFirstName);
-        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jwnl", person1.normalizedLastName, person2.normalizedLastName);
-        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jwn", person1.normalizedName, person2.normalizedName);
+        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank(
+                "jwnf",
+                person1.getStringValue("normalizedFirstName"),
+                person2.getStringValue("normalizedFirstName")
+        );
+        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank(
+                "jwnl",
+                person1.getStringValue("normalizedLastName"),
+                person2.getStringValue("normalizedLastName")
+        );
+        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank(
+                "jwn",
+                person1.getStringValue("normalizedName"),
+                person2.getStringValue("normalizedName")
+        );
     }
 
     private void extractDoubleMetaphoneFeatures() {
-        addFeatureTwoNotBlankStringsMatch("dmfn", person1.firstNameDM, person2.firstNameDM);
-        addFeatureTwoNotBlankStringsMatch("dmln", person1.lastNameDM, person2.lastNameDM);
-        addFeatureTwoNotBlankStringsMatch("dmn", person1.nameDM, person2.nameDM);
+        addFeatureTwoNotBlankStringsMatch(
+                "dmfn",
+                person1.getStringValue("firstNameDM"),
+                person2.getStringValue("firstNameDM")
+        );
+        addFeatureTwoNotBlankStringsMatch(
+                "dmln",
+                person1.getStringValue("lastNameDM"),
+                person2.getStringValue("lastNameDM")
+        );
+        addFeatureTwoNotBlankStringsMatch(
+                "dmn",
+                person1.getStringValue("nameDM"),
+                person2.getStringValue("nameDM")
+        );
     }
 
     private void extractBeiderMorseFeatures() {
-        String firstPersonNormalizedName = person1.normalizedName;
-        String secondPersonNormalizedName = person2.normalizedName;
+        String firstPersonNormalizedName = person1.getStringValue("normalizedName");
+        String secondPersonNormalizedName = person2.getStringValue("normalizedName");
 
         try {
             Set<String> firstPersonNormalizedNameBeiderMorseEncodingsSet = new HashSet<>(Arrays.asList(
@@ -134,10 +200,10 @@ public class USHMMClassificationInstance {
 
     private void extractDaitchMokotoffFeatures() {
         Set<String> firstPersonNormalizedNameDaitchMokotoffEncodingsSet = new HashSet<>(Arrays.asList(
-                daitchMokotoffSoundex.soundex(person1.normalizedName).split("|")
+                daitchMokotoffSoundex.soundex(person1.getStringValue("normalizedName")).split("|")
         ));
         Set<String> secondPersonNormalizedNameDaitchMokotoffEncodingsSet = new HashSet<>(Arrays.asList(
-                daitchMokotoffSoundex.soundex(person2.normalizedName).split("|")
+                daitchMokotoffSoundex.soundex(person2.getStringValue("normalizedName")).split("|")
         ));
         firstPersonNormalizedNameDaitchMokotoffEncodingsSet.retainAll(secondPersonNormalizedNameDaitchMokotoffEncodingsSet);
 
@@ -145,16 +211,24 @@ public class USHMMClassificationInstance {
     }
 
     private void extractMotherNameFeatures() {
-        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jwnm", person1.nameMotherFirstName + " " + person1.nameMotherLastName, person2.nameMotherFirstName + " " + person2.nameMotherLastName);
+        addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank(
+                "jwnm",
+                person1.getStringValue("nameMotherFirstName") + " " + person1.getStringValue("nameMotherLastName"),
+                person2.getStringValue("nameMotherFirstName") + " " + person2.getStringValue("nameMotherLastName")
+        );
     }
 
     private void extractPlaceBirthFeatures() {
-        addLevenshteinSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("lpb", person1.placeBirth, person2.placeBirth);
+        addLevenshteinSimilarityFeatureBetweenTwoSets(
+                "lpb",
+                person1.getSetOfStringsValues("placeBirth"),
+                person2.getSetOfStringsValues("placeBirth")
+        );
     }
 
     private void extractDateBirthFeatures() {
-        addUSHMMDateSimilarityIfBothStringAreNotBlank("db", person1.dateBirth, person2.dateBirth);
-        addLevenshteinSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("ldb", person1.dateBirth, person2.dateBirth);
+        addUSHMMDateSimilarityFeatureBetweenTwoSets("db", person1.getSetOfStringsValues("dateBirth"), person2.getSetOfStringsValues("dateBirth"));
+        addLevenshteinSimilarityFeatureBetweenTwoSets("ldb", person1.getSetOfStringsValues("dateBirth"), person2.getSetOfStringsValues("dateBirth"));
     }
 
     private void extractGenderFeature() {
@@ -166,14 +240,14 @@ public class USHMMClassificationInstance {
 
     private Set<String> getPersonGenderSet(USHMMPerson person) {
         Set<String> gendersSetPerson = new HashSet<>();
-        addStringToSetIfStringIsNotBlank(gendersSetPerson, person.gender);
-        addStringToSetIfStringIsNotBlank(gendersSetPerson, person.genderLinearClass);
-        addStringToSetIfStringIsNotBlank(gendersSetPerson, person.genderRuleBased);
+        addStringToSetIfStringIsNotBlank(gendersSetPerson, person.getStringValue("gender"));
+        addStringToSetIfStringIsNotBlank(gendersSetPerson, person.getStringValue("genderLinearClass"));
+        addStringToSetIfStringIsNotBlank(gendersSetPerson, person.getStringValue("genderRuleBased"));
         return gendersSetPerson;
     }
 
     private void extractSourceFeature() {
-        String source1 = person1.sourceId, source2 = person2.sourceId;
+        String source1 = person1.getStringValue("sourceId"), source2 = person2.getStringValue("sourceId");
         String first = source2, second = source1;
         if (source1.compareTo(source2) <= 0) {
             first = source1;
@@ -184,11 +258,14 @@ public class USHMMClassificationInstance {
     }
 
     private void extractPersonTypeFeature() {
-        addFeatureTwoNotBlankStringsMatch("pt", person1.personType, person2.personType);
+        addFeatureTwoNotBlankStringsMatch("pt", person1.getStringValue("personType"), person2.getStringValue("personType"));
     }
 
     private void extractOccupationFeature() {
-        addFeatureTwoNotBlankStringsMatch("occ", person1.occupation, person2.occupation);
+        Set<String> occupationsFirstPerson = person1.getSetOfStringsValues("occupation");
+        Set<String> occupationsSecondPerson = person2.getSetOfStringsValues("occupation");
+        occupationsFirstPerson.retainAll(occupationsSecondPerson);
+        addFeatureSetIsNotEmpty("occ", occupationsFirstPerson);
     }
 
 }

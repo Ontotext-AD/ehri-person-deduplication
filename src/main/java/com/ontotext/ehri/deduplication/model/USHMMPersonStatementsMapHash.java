@@ -63,7 +63,7 @@ class USHMMPersonStatementsMapHash {
     private static List<String> PREDICATE_NAMES;
     private static List<String> PREDICATES_QUERIES;
 
-    private Map<String, HashMap<String, String>> statementsMap;
+    private Map<String, Map<String, Set<String>>> statementsMap;
 
     @SuppressWarnings("unchecked")
     USHMMPersonStatementsMapHash(List<USHMMGoldStandardEntry> goldStandard, String personStatementsMapCache) {
@@ -72,7 +72,7 @@ class USHMMPersonStatementsMapHash {
         PREDICATES_QUERIES = Arrays.asList(PREDICATES_QUERIES_ARRAY);
         File statementsMapCacheFile = new File(personStatementsMapCache);
         if (statementsMapCacheFile.exists())
-            statementsMap = (Map<String, HashMap<String, String>>) SerializationUtils.deserialize(
+            statementsMap = (Map<String, Map<String, Set<String>>>) SerializationUtils.deserialize(
                     personStatementsMapCache
             );
         else {
@@ -83,13 +83,14 @@ class USHMMPersonStatementsMapHash {
         }
     }
 
-    String get(String person, String predicate) {
-        return statementsMap.get(person).get(predicate);
+    USHMMPerson getPerson(String personId) {
+        return new USHMMPerson(personId, statementsMap.get(personId));
     }
 
-    private Map<String, HashMap<String, String>> getMap(List<USHMMGoldStandardEntry> goldStandard, String personStatementsMapCache, EndpointConnection connection) {
+    private Map<String, Map<String, Set<String>>> getMap(List<USHMMGoldStandardEntry> goldStandard,
+                                                             String personStatementsMapCache, EndpointConnection connection) {
 
-        Map<String, HashMap<String, String>> statementsMap = new HashMap<>();
+        Map<String, Map<String, Set<String>>> statementsMap = new HashMap<>();
         Set<String> personsSetGoldStandard = getPersonsSetGoldStandard(goldStandard);
 
         for (String person : personsSetGoldStandard)
@@ -109,35 +110,33 @@ class USHMMPersonStatementsMapHash {
         return personsGoldStandard;
     }
 
-    private void putPropertyInMap(Map<String, HashMap<String, String>> statementsMap, String person, String predicate, EndpointConnection connection) {
-        HashMap<String, String> personStatementsMap = statementsMap.get(person);
+    private void putPropertyInMap(Map<String, Map<String, Set<String>>> statementsMap, String person, String predicate,
+                                  EndpointConnection connection) {
+        Map<String, Set<String>> personStatementsMap = statementsMap.get(person);
         if (personStatementsMap == null)
             personStatementsMap = new HashMap<>();
-        personStatementsMap.put(predicate, getStatementObject(person, predicate, connection).toLowerCase());
+        personStatementsMap.put(predicate, getStatementObject(person, predicate, connection));
         statementsMap.put(person, personStatementsMap);
     }
 
-    private String getStatementObject(String personId, String predicate, EndpointConnection connection) {
+    private Set<String> getStatementObject(String personId, String predicate, EndpointConnection connection) {
         Set<String> resultBindingSet = new HashSet<>();
         tryToPrepareAndEvaluateQuery(
                 personId, PREDICATES_QUERIES.get(PREDICATE_NAMES.indexOf(predicate)), resultBindingSet, connection
         );
-        if (resultBindingSet.iterator().hasNext())
-            return resultBindingSet.iterator().next();
-        else
-            return "";
+        return resultBindingSet;
     }
 
-    private void tryToPrepareAndEvaluateQuery(String personId, String predicate, Set<String> results, EndpointConnection connection) {
+    private void tryToPrepareAndEvaluateQuery(String personId, String predicate, Set<String> resultBindingSet, EndpointConnection connection) {
         try {
-            prepareAndEvaluateQuery(personId, predicate, results, connection);
+            prepareAndEvaluateQuery(personId, predicate, resultBindingSet, connection);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
     }
 
-    private void prepareAndEvaluateQuery(String personId, String predicate, Set<String> results, EndpointConnection connection)
+    private void prepareAndEvaluateQuery(String personId, String predicate, Set<String> resultBindingSet, EndpointConnection connection)
             throws RepositoryException, MalformedQueryException, QueryEvaluationException, TupleQueryResultHandlerException {
         TupleQuery query = connection.prepareSPARQLTupleQuery(
                 "PREFIX onto: <http://data.ehri-project.eu/ontotext/>\n" +
@@ -148,20 +147,20 @@ class USHMMPersonStatementsMapHash {
                         "    " + predicate + "\n" +
                         "}"
         );
-        query.evaluate(new USHMMQueryResultHandler(results));
+        query.evaluate(new USHMMQueryResultHandler(resultBindingSet));
     }
 
     private static class USHMMQueryResultHandler extends QueryResultHandler {
         private Set<String> resultBindingSet;
 
-        USHMMQueryResultHandler(Set<String> results) {
-            this.resultBindingSet = results;
+        USHMMQueryResultHandler(Set<String> resultBindingSet) {
+            this.resultBindingSet = resultBindingSet;
         }
 
         @Override
         public void handleSolution(BindingSet bindingSet) throws TupleQueryResultHandlerException {
-            if (bindingSet.iterator().hasNext())
-                resultBindingSet.add(bindingSet.iterator().next().getValue().stringValue());
+            for (Binding binding : bindingSet)
+                resultBindingSet.add(binding.getValue().stringValue().toLowerCase());
         }
     }
 }
