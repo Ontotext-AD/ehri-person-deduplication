@@ -2,7 +2,8 @@ package com.ontotext.ehri.deduplication.classifier;
 
 import classification.algorithms.MultithreadedSigmoidPerceptron;
 import classification.functions.CompleteFeatureFunction;
-import com.ontotext.ehri.deduplication.model.USHMMPersonPair;
+import com.ontotext.ehri.deduplication.model.USHMMPerson;
+import javafx.util.Pair;
 import org.apache.log4j.Logger;
 import types.Alphabet;
 import types.ClassificationInstance;
@@ -38,18 +39,18 @@ public class ClassifierTrainer {
 
     private static final int COUNT_EXPERIMENTS = 10;
 
-    private static final int DEFAULT_NUMBER_OF_ITERATIONS = 10000;
+    private static final int DEFAULT_NUMBER_OF_ITERATIONS = 200;
     private static final int DEFAULT_NUMBER_OF_THREADS = 4;
 
     private Alphabet xA;
     private Alphabet yA;
     private List<ClassificationInstance> allData;
-    private static Map<ClassificationInstance, USHMMPersonPair> classificationInstanceUSHMMPersonPairMap;
+    private static Map<ClassificationInstance, Pair<USHMMPerson, USHMMPerson>> classificationInstanceUSHMMPersonPairMap;
 
     private Map<Integer, double[]> perExperimentScores;
     private Map<String, double[][]> perLabelScores;
 
-    public ClassifierTrainer(Map<ClassificationInstance, USHMMPersonPair> classificationInstanceUSHMMPersonPairMap) {
+    public ClassifierTrainer(Map<ClassificationInstance, Pair<USHMMPerson, USHMMPerson>> classificationInstanceUSHMMPersonPairMap) {
 
         this.allData = new ArrayList<>(classificationInstanceUSHMMPersonPairMap.keySet());
         this.classificationInstanceUSHMMPersonPairMap = classificationInstanceUSHMMPersonPairMap;
@@ -185,7 +186,8 @@ public class ClassifierTrainer {
             sparseVector += (h.getxAlphabet().lookupInt(inst.x.getIndexAt(i)) + " : " + inst.x.getValueAt(i) + " ");
         LOG.info("False class : " + yA.lookupInt(h.label(inst.x)) + " True class : " + yA.lookupInt(inst.y));
         LOG.info(sparseVector);
-        LOG.info(classificationInstanceUSHMMPersonPairMap.get(inst));
+        LOG.info(classificationInstanceUSHMMPersonPairMap.get(inst).getKey());
+        LOG.info(classificationInstanceUSHMMPersonPairMap.get(inst).getValue());
     }
 
     private static double[] computeMicroMeasures(int[] tpInClass, int[] fpInClass, int[] fnInClass) {
