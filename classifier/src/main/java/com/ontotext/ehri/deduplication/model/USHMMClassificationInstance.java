@@ -2,6 +2,7 @@ package com.ontotext.ehri.deduplication.model;
 
 import com.ontotext.ehri.deduplication.measures.Levenshtein;
 import com.ontotext.ehri.deduplication.measures.USHMMDate;
+import com.ontotext.ehri.normalization.USHMMNationalityNormalization;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.language.DaitchMokotoffSoundex;
 import org.apache.commons.codec.language.bm.BeiderMorseEncoder;
@@ -288,7 +289,7 @@ public class USHMMClassificationInstance {
     }
 
     private boolean nationalitiesMatch(String nationality1, String nationality2) {
-        String normalized1 = getNormalizedNationality(nationality1), normalized2 = getNormalizedNationality(nationality2);
+        String normalized1 = USHMMNationalityNormalization.normalize(nationality1), normalized2 = USHMMNationalityNormalization.normalize(nationality2);
         String shorter = normalized2, longer = normalized1;
         if (normalized1.length() < normalized2.length()) {
             shorter = normalized1;
@@ -296,14 +297,6 @@ public class USHMMClassificationInstance {
         }
         return (shorter.equals(longer) || (shorter.equals("Czech") && longer.equals("Czechoslovakian")) ||
                 (shorter.equals("Slovak") && longer.equals("Czechoslovakian")));
-    }
-
-    private String getNormalizedNationality(String nationality) {
-        String normalizedNationality = nationality;
-        int index = normalizedNationality.indexOf("(\"");
-        if (index != -1)
-            normalizedNationality = normalizedNationality.substring(0, index).trim();
-        return normalizedNationality;
     }
 
 }
