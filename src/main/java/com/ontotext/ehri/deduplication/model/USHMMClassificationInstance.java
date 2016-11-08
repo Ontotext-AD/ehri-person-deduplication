@@ -59,8 +59,8 @@ public class USHMMClassificationInstance {
     private void addLevenshteinSimilarityFeatureBetweenTwoSets(final String featurePrefix, Set<String> set1, Set<String> set2) {
         double minimum = Double.MAX_VALUE;
 
-        for (String s1: set1)
-            for (String s2: set2)
+        for (String s1 : set1)
+            for (String s2 : set2)
                 minimum = getLevenshteinSimilarityMinimum(minimum, s1, s2);
 
         if (minimum != Double.MAX_VALUE)
@@ -80,8 +80,8 @@ public class USHMMClassificationInstance {
     private void addUSHMMDateSimilarityFeatureBetweenTwoSets(final String featurePrefix, Set<String> set1, Set<String> set2) {
         double minimum = Double.MAX_VALUE;
 
-        for (String s1: set1)
-            for (String s2: set2)
+        for (String s1 : set1)
+            for (String s2 : set2)
                 minimum = getUSHMMDateSimilarityMinimum(minimum, s1, s2);
 
         if (minimum != Double.MAX_VALUE)
@@ -190,9 +190,9 @@ public class USHMMClassificationInstance {
             Set<String> secondPersonNormalizedNameBeiderMorseEncodingsSet = new HashSet<>(Arrays.asList(
                     beiderMorseEncoder.encode(secondPersonNormalizedName).split("|")
             ));
-            firstPersonNormalizedNameBeiderMorseEncodingsSet.retainAll(secondPersonNormalizedNameBeiderMorseEncodingsSet);
-
-            addFeatureSetIsNotEmpty("bm", firstPersonNormalizedNameBeiderMorseEncodingsSet);
+            Set<String> commonBeiderMorseEncodings = new HashSet<>(firstPersonNormalizedNameBeiderMorseEncodingsSet);
+            commonBeiderMorseEncodings.retainAll(secondPersonNormalizedNameBeiderMorseEncodingsSet);
+            addFeatureSetIsNotEmpty("bm", commonBeiderMorseEncodings);
         } catch (EncoderException e) {
             logger.warn(String.format(
                     "Beider Morse encoder fail %s %s", firstPersonNormalizedName, secondPersonNormalizedName), e);
@@ -206,9 +206,9 @@ public class USHMMClassificationInstance {
         Set<String> secondPersonNormalizedNameDaitchMokotoffEncodingsSet = new HashSet<>(Arrays.asList(
                 daitchMokotoffSoundex.soundex(person2.getStringValue("normalizedName")).split("|")
         ));
-        firstPersonNormalizedNameDaitchMokotoffEncodingsSet.retainAll(secondPersonNormalizedNameDaitchMokotoffEncodingsSet);
-
-        addFeatureSetIsNotEmpty("dms", firstPersonNormalizedNameDaitchMokotoffEncodingsSet);
+        Set<String> commonDaitchMokotoffEncodings = new HashSet<>(firstPersonNormalizedNameDaitchMokotoffEncodingsSet);
+        commonDaitchMokotoffEncodings.retainAll(secondPersonNormalizedNameDaitchMokotoffEncodingsSet);
+        addFeatureSetIsNotEmpty("dms", commonDaitchMokotoffEncodings);
     }
 
     private void extractMotherNameFeatures() {
@@ -235,8 +235,9 @@ public class USHMMClassificationInstance {
     private void extractGenderFeature() {
         Set<String> gendersSetFirstPerson = getPersonGenderSet(person1);
         Set<String> gendersSetSecondPerson = getPersonGenderSet(person2);
-        gendersSetFirstPerson.retainAll(gendersSetSecondPerson);
-        addFeatureSetIsNotEmpty("g", gendersSetFirstPerson);
+        Set<String> commonGenders = new HashSet<>(gendersSetFirstPerson);
+        commonGenders.retainAll(gendersSetSecondPerson);
+        addFeatureSetIsNotEmpty("g", commonGenders);
     }
 
     private Set<String> getPersonGenderSet(USHMMPerson person) {
