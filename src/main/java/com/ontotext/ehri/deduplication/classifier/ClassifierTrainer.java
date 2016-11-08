@@ -39,7 +39,7 @@ public class ClassifierTrainer {
 
     private static final int COUNT_EXPERIMENTS = 10;
 
-    private static final int DEFAULT_NUMBER_OF_ITERATIONS = 200;
+    private static final int DEFAULT_NUMBER_OF_ITERATIONS = 10000;
     private static final int DEFAULT_NUMBER_OF_THREADS = 4;
 
     private Alphabet xA;
