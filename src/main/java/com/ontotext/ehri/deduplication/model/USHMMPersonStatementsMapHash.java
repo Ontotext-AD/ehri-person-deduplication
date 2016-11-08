@@ -36,6 +36,7 @@ class USHMMPersonStatementsMapHash {
             "occupation",
             "nameMotherFirstName",
             "nameMotherLastName",
+            "nationality",
     };
 
     private static final String[] PREDICATES_QUERIES_ARRAY = {
@@ -57,6 +58,7 @@ class USHMMPersonStatementsMapHash {
             "?s ushmm:occupation ?o.",
             "?s ushmm:nameMother / ushmm:firstName ?o.",
             "?s ushmm:nameMother / ushmm:lastName ?o.",
+            "?s ushmm:nationality / ushmm:nationality ?o.",
 
     };
 

@@ -46,6 +46,7 @@ public class USHMMClassificationInstance {
         extractSourceFeature();
         extractPersonTypeFeature();
         extractOccupationFeature();
+        extractNationalityFeature();
         return sparseVector;
     }
 
@@ -264,8 +265,44 @@ public class USHMMClassificationInstance {
     private void extractOccupationFeature() {
         Set<String> occupationsFirstPerson = person1.getSetOfStringsValues("occupation");
         Set<String> occupationsSecondPerson = person2.getSetOfStringsValues("occupation");
-        occupationsFirstPerson.retainAll(occupationsSecondPerson);
-        addFeatureSetIsNotEmpty("occ", occupationsFirstPerson);
+        Set<String> commonOccupations = new HashSet<>(occupationsFirstPerson);
+        commonOccupations.retainAll(occupationsSecondPerson);
+        addFeatureSetIsNotEmpty("occ", commonOccupations);
+    }
+
+    private void extractNationalityFeature() {
+        Set<String> nationalitiesFirstPerson = person1.getSetOfStringsValues("nationality");
+        Set<String> nationalitiesSecondPerson = person1.getSetOfStringsValues("nationality");
+        Set<String> commonNationalities = getCommonNationalities(nationalitiesFirstPerson, nationalitiesSecondPerson);
+        addFeatureSetIsNotEmpty("nat", commonNationalities);
+    }
+
+    private Set<String> getCommonNationalities(Set<String> nationalitiesFirstPerson, Set<String> nationalitiesSecondPerson) {
+        Set<String> commonNationalities = new HashSet<>();
+        for (String nationality1 : nationalitiesFirstPerson)
+            for (String nationality2 : nationalitiesSecondPerson)
+                if (nationalitiesMatch(nationality1, nationality2))
+                    commonNationalities.add(nationality1);
+        return commonNationalities;
+    }
+
+    private boolean nationalitiesMatch(String nationality1, String nationality2) {
+        String normalized1 = getNormalizedNationality(nationality1), normalized2 = getNormalizedNationality(nationality2);
+        String shorter = normalized2, longer = normalized1;
+        if (normalized1.length() < normalized2.length()) {
+            shorter = normalized1;
+            longer = normalized2;
+        }
+        return (shorter.equals(longer) || (shorter.equals("Czech") && longer.equals("Czechoslovakian")) ||
+                (shorter.equals("Slovak") && longer.equals("Czechoslovakian")));
+    }
+
+    private String getNormalizedNationality(String nationality) {
+        String normalizedNationality = nationality;
+        int index = normalizedNationality.indexOf("(\"");
+        if (index != -1)
+            normalizedNationality = normalizedNationality.substring(0, index).trim();
+        return normalizedNationality;
     }
 
 }
