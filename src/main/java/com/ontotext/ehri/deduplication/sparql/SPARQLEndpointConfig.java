@@ -5,13 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class SPARQLEndpointConfig {
+class SPARQLEndpointConfig {
 
-    public String repositoryURL;
-    public String username;
-    public String password;
+    String repositoryURL;
+    String username;
+    String password;
 
-    public SPARQLEndpointConfig() {
+    SPARQLEndpointConfig() {
         InputStream inputStream = null;
         try {
             Properties prop = new Properties();
