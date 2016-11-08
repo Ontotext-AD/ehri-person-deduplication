@@ -104,8 +104,8 @@ class USHMMPersonStatementsMapHash {
     private Set<String> getPersonsSetGoldStandard(List<USHMMGoldStandardEntry> goldStandard) {
         Set<String> personsGoldStandard = new HashSet<>();
         for (USHMMGoldStandardEntry goldStandardEntry : goldStandard) {
-            personsGoldStandard.add(goldStandardEntry.personId1);
-            personsGoldStandard.add(goldStandardEntry.personId2);
+            personsGoldStandard.add(goldStandardEntry.getPersonId1());
+            personsGoldStandard.add(goldStandardEntry.getPersonId2());
         }
         return personsGoldStandard;
     }
