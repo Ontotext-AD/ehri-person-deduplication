@@ -11,5 +11,6 @@
 
     <modules>
         <module>classifier</module>
+        <module>genders</module>
     </modules>
 </project>
