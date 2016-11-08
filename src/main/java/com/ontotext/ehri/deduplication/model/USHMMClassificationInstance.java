@@ -46,6 +46,7 @@ public class USHMMClassificationInstance {
         extractSourceFeature();
         extractPersonTypeFeature();
         extractOccupationFeature();
+        extractNationalityFeature();
         return sparseVector;
     }
 
@@ -58,8 +59,8 @@ public class USHMMClassificationInstance {
     private void addLevenshteinSimilarityFeatureBetweenTwoSets(final String featurePrefix, Set<String> set1, Set<String> set2) {
         double minimum = Double.MAX_VALUE;
 
-        for (String s1: set1)
-            for (String s2: set2)
+        for (String s1 : set1)
+            for (String s2 : set2)
                 minimum = getLevenshteinSimilarityMinimum(minimum, s1, s2);
 
         if (minimum != Double.MAX_VALUE)
@@ -79,8 +80,8 @@ public class USHMMClassificationInstance {
     private void addUSHMMDateSimilarityFeatureBetweenTwoSets(final String featurePrefix, Set<String> set1, Set<String> set2) {
         double minimum = Double.MAX_VALUE;
 
-        for (String s1: set1)
-            for (String s2: set2)
+        for (String s1 : set1)
+            for (String s2 : set2)
                 minimum = getUSHMMDateSimilarityMinimum(minimum, s1, s2);
 
         if (minimum != Double.MAX_VALUE)
@@ -189,9 +190,9 @@ public class USHMMClassificationInstance {
             Set<String> secondPersonNormalizedNameBeiderMorseEncodingsSet = new HashSet<>(Arrays.asList(
                     beiderMorseEncoder.encode(secondPersonNormalizedName).split("|")
             ));
-            firstPersonNormalizedNameBeiderMorseEncodingsSet.retainAll(secondPersonNormalizedNameBeiderMorseEncodingsSet);
-
-            addFeatureSetIsNotEmpty("bm", firstPersonNormalizedNameBeiderMorseEncodingsSet);
+            Set<String> commonBeiderMorseEncodings = new HashSet<>(firstPersonNormalizedNameBeiderMorseEncodingsSet);
+            commonBeiderMorseEncodings.retainAll(secondPersonNormalizedNameBeiderMorseEncodingsSet);
+            addFeatureSetIsNotEmpty("bm", commonBeiderMorseEncodings);
         } catch (EncoderException e) {
             logger.warn(String.format(
                     "Beider Morse encoder fail %s %s", firstPersonNormalizedName, secondPersonNormalizedName), e);
@@ -205,9 +206,9 @@ public class USHMMClassificationInstance {
         Set<String> secondPersonNormalizedNameDaitchMokotoffEncodingsSet = new HashSet<>(Arrays.asList(
                 daitchMokotoffSoundex.soundex(person2.getStringValue("normalizedName")).split("|")
         ));
-        firstPersonNormalizedNameDaitchMokotoffEncodingsSet.retainAll(secondPersonNormalizedNameDaitchMokotoffEncodingsSet);
-
-        addFeatureSetIsNotEmpty("dms", firstPersonNormalizedNameDaitchMokotoffEncodingsSet);
+        Set<String> commonDaitchMokotoffEncodings = new HashSet<>(firstPersonNormalizedNameDaitchMokotoffEncodingsSet);
+        commonDaitchMokotoffEncodings.retainAll(secondPersonNormalizedNameDaitchMokotoffEncodingsSet);
+        addFeatureSetIsNotEmpty("dms", commonDaitchMokotoffEncodings);
     }
 
     private void extractMotherNameFeatures() {
@@ -234,8 +235,9 @@ public class USHMMClassificationInstance {
     private void extractGenderFeature() {
         Set<String> gendersSetFirstPerson = getPersonGenderSet(person1);
         Set<String> gendersSetSecondPerson = getPersonGenderSet(person2);
-        gendersSetFirstPerson.retainAll(gendersSetSecondPerson);
-        addFeatureSetIsNotEmpty("g", gendersSetFirstPerson);
+        Set<String> commonGenders = new HashSet<>(gendersSetFirstPerson);
+        commonGenders.retainAll(gendersSetSecondPerson);
+        addFeatureSetIsNotEmpty("g", commonGenders);
     }
 
     private Set<String> getPersonGenderSet(USHMMPerson person) {
@@ -264,8 +266,44 @@ public class USHMMClassificationInstance {
     private void extractOccupationFeature() {
         Set<String> occupationsFirstPerson = person1.getSetOfStringsValues("occupation");
         Set<String> occupationsSecondPerson = person2.getSetOfStringsValues("occupation");
-        occupationsFirstPerson.retainAll(occupationsSecondPerson);
-        addFeatureSetIsNotEmpty("occ", occupationsFirstPerson);
+        Set<String> commonOccupations = new HashSet<>(occupationsFirstPerson);
+        commonOccupations.retainAll(occupationsSecondPerson);
+        addFeatureSetIsNotEmpty("occ", commonOccupations);
+    }
+
+    private void extractNationalityFeature() {
+        Set<String> nationalitiesFirstPerson = person1.getSetOfStringsValues("nationality");
+        Set<String> nationalitiesSecondPerson = person1.getSetOfStringsValues("nationality");
+        Set<String> commonNationalities = getCommonNationalities(nationalitiesFirstPerson, nationalitiesSecondPerson);
+        addFeatureSetIsNotEmpty("nat", commonNationalities);
+    }
+
+    private Set<String> getCommonNationalities(Set<String> nationalitiesFirstPerson, Set<String> nationalitiesSecondPerson) {
+        Set<String> commonNationalities = new HashSet<>();
+        for (String nationality1 : nationalitiesFirstPerson)
+            for (String nationality2 : nationalitiesSecondPerson)
+                if (nationalitiesMatch(nationality1, nationality2))
+                    commonNationalities.add(nationality1);
+        return commonNationalities;
+    }
+
+    private boolean nationalitiesMatch(String nationality1, String nationality2) {
+        String normalized1 = getNormalizedNationality(nationality1), normalized2 = getNormalizedNationality(nationality2);
+        String shorter = normalized2, longer = normalized1;
+        if (normalized1.length() < normalized2.length()) {
+            shorter = normalized1;
+            longer = normalized2;
+        }
+        return (shorter.equals(longer) || (shorter.equals("Czech") && longer.equals("Czechoslovakian")) ||
+                (shorter.equals("Slovak") && longer.equals("Czechoslovakian")));
+    }
+
+    private String getNormalizedNationality(String nationality) {
+        String normalizedNationality = nationality;
+        int index = normalizedNationality.indexOf("(\"");
+        if (index != -1)
+            normalizedNationality = normalizedNationality.substring(0, index).trim();
+        return normalizedNationality;
     }
 
 }

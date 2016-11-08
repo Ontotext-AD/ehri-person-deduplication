@@ -17,7 +17,7 @@ import java.util.*;
 
 class USHMMPersonStatementsMapHash {
 
-    static final String[] PREDICATE_NAMES_ARRAY = {
+    private static final String[] PREDICATE_NAMES_ARRAY = {
             "firstName",
             "lastName",
             "normalizedFirstName",
@@ -36,6 +36,7 @@ class USHMMPersonStatementsMapHash {
             "occupation",
             "nameMotherFirstName",
             "nameMotherLastName",
+            "nationality",
     };
 
     private static final String[] PREDICATES_QUERIES_ARRAY = {
@@ -57,6 +58,7 @@ class USHMMPersonStatementsMapHash {
             "?s ushmm:occupation ?o.",
             "?s ushmm:nameMother / ushmm:firstName ?o.",
             "?s ushmm:nameMother / ushmm:lastName ?o.",
+            "?s ushmm:nationality / ushmm:nationality ?o.",
 
     };
 
@@ -104,8 +106,8 @@ class USHMMPersonStatementsMapHash {
     private Set<String> getPersonsSetGoldStandard(List<USHMMGoldStandardEntry> goldStandard) {
         Set<String> personsGoldStandard = new HashSet<>();
         for (USHMMGoldStandardEntry goldStandardEntry : goldStandard) {
-            personsGoldStandard.add(goldStandardEntry.personId1);
-            personsGoldStandard.add(goldStandardEntry.personId2);
+            personsGoldStandard.add(goldStandardEntry.getPersonId1());
+            personsGoldStandard.add(goldStandardEntry.getPersonId2());
         }
         return personsGoldStandard;
     }
@@ -140,12 +142,12 @@ class USHMMPersonStatementsMapHash {
             throws RepositoryException, MalformedQueryException, QueryEvaluationException, TupleQueryResultHandlerException {
         TupleQuery query = connection.prepareSPARQLTupleQuery(
                 "PREFIX onto: <http://data.ehri-project.eu/ontotext/>\n" +
-                        "PREFIX ushmm: <http://data.ehri-project.eu/ushmm/ontology/>\n" +
-                        "select ?o where {\n" +
-                        "    ?s a ushmm:Person.\n" +
-                        "    ?s ushmm:personId \"" + personId + "\".\n" +
-                        "    " + predicate + "\n" +
-                        "}"
+                "PREFIX ushmm: <http://data.ehri-project.eu/ushmm/ontology/>\n" +
+                "select ?o where {\n" +
+                "    ?s a ushmm:Person.\n" +
+                "    ?s ushmm:personId \"" + personId + "\".\n" +
+                "    " + predicate + "\n" +
+                "}"
         );
         query.evaluate(new USHMMQueryResultHandler(resultBindingSet));
     }

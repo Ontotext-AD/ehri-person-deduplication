@@ -24,7 +24,7 @@ class USHMMPersonsFeatureExtractor {
     }
 
     private void putInstance(Map<ClassificationInstance, Pair<USHMMPerson, USHMMPerson>> classificationInstanceUSHMMPersonPairMap, USHMMPersonStatementsMapHash statementsMap, USHMMGoldStandardEntry entry, Alphabet xA, Alphabet yA) {
-        Pair<USHMMPerson, USHMMPerson> personPair = new Pair<>(statementsMap.getPerson(entry.personId1), statementsMap.getPerson(entry.personId2));
+        Pair<USHMMPerson, USHMMPerson> personPair = new Pair<>(statementsMap.getPerson(entry.getPersonId1()), statementsMap.getPerson(entry.getPersonId2()));
         USHMMClassificationInstance instance = new USHMMClassificationInstance(xA, personPair.getKey(), personPair.getValue());
         ClassificationInstance classificationInstance = new ClassificationInstance(xA, yA, instance.getSparseVector(), yA.lookupObject(entry.getLabel()));
         classificationInstanceUSHMMPersonPairMap.put(classificationInstance, personPair);
