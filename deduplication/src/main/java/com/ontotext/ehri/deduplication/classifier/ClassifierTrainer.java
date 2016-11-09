@@ -1,33 +1,22 @@
 package com.ontotext.ehri.deduplication.classifier;
 
-import classification.algorithms.MultithreadedSigmoidPerceptron;
-import classification.functions.CompleteFeatureFunction;
+import com.ontotext.ehri.classifier.BaseClassifierTrainer;
 import com.ontotext.ehri.deduplication.model.USHMMPerson;
 import javafx.util.Pair;
 import org.apache.log4j.Logger;
 import types.Alphabet;
 import types.ClassificationInstance;
 import types.LinearClassifier;
-import utils.ReportRenderer;
-import utils.io.IOUtils;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.*;
 
-public class ClassifierTrainer {
+public class ClassifierTrainer extends BaseClassifierTrainer {
 
     private static final transient Logger LOG = Logger.getLogger(ClassifierTrainer.class);
-
-    private static final int SCORES_COUNT = 3;
-
-    private static final int F1_OFFSET = 0;
-    private static final int PRECISION_OFFSET = 1;
-    private static final int RECALL_OFFSET = 2;
 
     private static final int PRECISION_INDEX = 0;
     private static final int RECALL_INDEX = 1;
@@ -37,64 +26,20 @@ public class ClassifierTrainer {
     private static final int FP_INDEX = 1;
     private static final int FN_INDEX = 2;
 
-    private static final int COUNT_EXPERIMENTS = 10;
-
-    private static final int DEFAULT_NUMBER_OF_ITERATIONS = 10000;
-    private static final int DEFAULT_NUMBER_OF_THREADS = 4;
-
-    private Alphabet xA;
-    private Alphabet yA;
-    private List<ClassificationInstance> allData;
     private static Map<ClassificationInstance, Pair<USHMMPerson, USHMMPerson>> classificationInstanceUSHMMPersonPairMap;
-
-    private Map<Integer, double[]> perExperimentScores;
-    private Map<String, double[][]> perLabelScores;
 
     public ClassifierTrainer(Map<ClassificationInstance, Pair<USHMMPerson, USHMMPerson>> classificationInstanceUSHMMPersonPairMap) {
 
         this.allData = new ArrayList<>(classificationInstanceUSHMMPersonPairMap.keySet());
         this.classificationInstanceUSHMMPersonPairMap = classificationInstanceUSHMMPersonPairMap;
-
+        numberOfIterations = 10000;
         getAlphabetsAndStopGrowth();
         initializeScoresMaps();
 
     }
 
-    private void getAlphabetsAndStopGrowth() {
-        xA = allData.get(0).getxAlphabet();
-        xA.stopGrowth();
-
-        yA = allData.get(0).getyAlphabet();
-        yA.stopGrowth();
-    }
-
-    private void initializeScoresMaps() {
-        perExperimentScores = new TreeMap<>();
-        perLabelScores = new TreeMap<>();
-        for (String label : getSortedLabels())
-            perLabelScores.put(label, new double[COUNT_EXPERIMENTS][SCORES_COUNT]);
-    }
-
-    private Set<String> getSortedLabels() {
-        Set<String> sortedSet = new TreeSet<>();
-        for (int i = 0; i < yA.size(); i++)
-            sortedSet.add(yA.lookupInt(i));
-        return sortedSet;
-    }
-
-    public void trainAndSaveModel(String resultsFilename, String modelPath) throws IOException, URISyntaxException {
-        LinearClassifier linearClassifier = trainModel();
-        reportResultsAndSaveModel(linearClassifier, resultsFilename, modelPath);
-    }
-
-    private LinearClassifier trainModel() {
-        LinearClassifier linearClassifier = null;
-        for (int experiment = 0; experiment < COUNT_EXPERIMENTS; experiment++)
-            linearClassifier = getLinearClassifierFromExperiment(experiment);
-        return linearClassifier;
-    }
-
-    private LinearClassifier getLinearClassifierFromExperiment(int experiment) {
+    @Override
+    public LinearClassifier getLinearClassifierFromExperiment(int experiment) {
         int splitSize = allData.size() / COUNT_EXPERIMENTS;
         int offsetSplitLeft = (experiment) * (splitSize);
         int offsetSplitRight = (experiment + 1) * (splitSize);
@@ -112,24 +57,8 @@ public class ClassifierTrainer {
         return trainData;
     }
 
-    private LinearClassifier trainClassifierAndStoreComputedScores(int experiment,
-                                                                   List<ClassificationInstance> trainData, List<ClassificationInstance> testData) {
-        LinearClassifier linearClassifier = trainMultithreadedSigmoidPerceptron(
-                DEFAULT_NUMBER_OF_ITERATIONS, DEFAULT_NUMBER_OF_THREADS, trainData
-        );
-        computeAndStoreScores(experiment, testData, linearClassifier);
-        return linearClassifier;
-    }
-
-    private LinearClassifier trainMultithreadedSigmoidPerceptron(int numberOfIterations, int numberOfThreads,
-                                                                 List<ClassificationInstance> trainData) {
-        MultithreadedSigmoidPerceptron multithreadedSigmoidPerceptron = new MultithreadedSigmoidPerceptron(
-                numberOfIterations, numberOfThreads, xA, yA, new CompleteFeatureFunction(xA, yA)
-        );
-        return multithreadedSigmoidPerceptron.batchTrain(trainData);
-    }
-
-    private void computeAndStoreScores(int experiment, List<ClassificationInstance> testData, LinearClassifier linearClassifier) {
+    @Override
+    public void computeAndStoreScores(int experiment, List<ClassificationInstance> testData, LinearClassifier linearClassifier) {
         double[] experimentScores = computeScores(linearClassifier, testData);
         for (int i = 0; i < yA.size(); i++)
             getLabelScores(experiment, experimentScores, i);
@@ -181,11 +110,8 @@ public class ClassifierTrainer {
 
     private static void outputInstance(LinearClassifier h, ClassificationInstance inst) {
         Alphabet yA = h.getyAlphabet();
-        String sparseVector = "";
-        for (int i = 0; i < inst.x.indices.size(); ++i)
-            sparseVector += (h.getxAlphabet().lookupInt(inst.x.getIndexAt(i)) + " : " + inst.x.getValueAt(i) + " ");
         LOG.info("False class : " + yA.lookupInt(h.label(inst.x)) + " True class : " + yA.lookupInt(inst.y));
-        LOG.info(sparseVector);
+        LOG.info(inst.x.toString());
         LOG.info(classificationInstanceUSHMMPersonPairMap.get(inst).getKey());
         LOG.info(classificationInstanceUSHMMPersonPairMap.get(inst).getValue());
     }
@@ -359,20 +285,6 @@ public class ClassifierTrainer {
         measures[(SCORES_COUNT * 2) + classIndex * SCORES_COUNT + F1_OFFSET] = resultsPerClass[F1_OFFSET];
         measures[(SCORES_COUNT * 2) + classIndex * SCORES_COUNT + PRECISION_OFFSET] = resultsPerClass[PRECISION_OFFSET];
         measures[(SCORES_COUNT * 2) + classIndex * SCORES_COUNT + RECALL_OFFSET] = resultsPerClass[RECALL_OFFSET];
-    }
-
-    private void getLabelScores(int experiment, double[] experimentScores, int i) {
-        double[][] labelScores = perLabelScores.get(yA.lookupInt(i));
-        int labelScoresOffset = (SCORES_COUNT * 2) + (i * SCORES_COUNT);
-        labelScores[experiment][F1_OFFSET] = experimentScores[labelScoresOffset + F1_OFFSET];
-        labelScores[experiment][PRECISION_OFFSET] = experimentScores[labelScoresOffset + PRECISION_OFFSET];
-        labelScores[experiment][RECALL_OFFSET] = experimentScores[labelScoresOffset + RECALL_OFFSET];
-    }
-
-    private void reportResultsAndSaveModel(LinearClassifier linearClassifier, String resultsFilename, String modelPath)
-            throws IOException, URISyntaxException {
-        ReportRenderer.renderResultsSingleLabel(resultsFilename, COUNT_EXPERIMENTS, perLabelScores, perExperimentScores);
-        IOUtils.saveModel(linearClassifier, new File(modelPath).toURI().toURL());
     }
 
 }
