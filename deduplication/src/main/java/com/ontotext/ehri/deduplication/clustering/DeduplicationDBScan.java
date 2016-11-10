@@ -17,15 +17,14 @@ public class DeduplicationDBScan {
     public static void main(String[] args) throws QueryEvaluationException, TupleQueryResultHandlerException, IOException, ClassNotFoundException {
         LinearClassifier model = (LinearClassifier) IOUtils.loadModel(new File("/home/nelly/workspace/model.bin").toURI().toURL());
         DBSCANClusterer dbscanClusterer =  new DBSCANClusterer(0.001d, 5, new DistanceMeasure(model));
-//        Map<String, Map<String, Set<String>>> dataMap = getData("/home/nelly/data.cache");
-//        List<Map<String, Set<String>>> data = getDataList(dataMap, 100);
-        Map<String, Map<String, Set<String>>> statementsMap = (Map<String, Map<String, Set<String>>>) SerializationUtils.deserialize(
-                "/home/nelly/workspace/statementsMap.cache"
-        );
-        List<USHMMPerson> data = getData(statementsMap);
-        System.out.println(data.size());
+        Map<String, Map<String, Set<String>>> dataMap = getDataFromCache("/home/nelly/data.cache");
+        List<USHMMPerson> data = getDataList(dataMap);
+//        Map<String, Map<String, Set<String>>> statementsMap = (Map<String, Map<String, Set<String>>>) SerializationUtils.deserialize(
+//                "/home/nelly/workspace/statementsMap.cache"
+//        );
+       // List<USHMMPerson> data = getData(statementsMap);
         List<Cluster> clusters = dbscanClusterer.cluster(data);
-        printClustersStatsToSTDOut(clusters);
+        printClustersStatsToSTDOut(clusters, data.size());
     }
 
     private static List<USHMMPerson> getData(Map<String, Map<String, Set<String>>> statementsMap) {
@@ -34,15 +33,21 @@ public class DeduplicationDBScan {
         ).collect(Collectors.toList());
     }
 
-    private static void printClustersStatsToSTDOut(List<Cluster> clusters) {
+    private static void printClustersStatsToSTDOut(List<Cluster> clusters, int totalPoints) {
+        int minClusterSize = totalPoints, maxClusterSize = -1;
         int reachablePointsCount = 0;
         for (Cluster cluster : clusters)
         {
-            reachablePointsCount += cluster.points.size();
+            int clusterSize = cluster.points.size();
+            reachablePointsCount += clusterSize;
+            if (minClusterSize > clusterSize) minClusterSize = clusterSize;
+            if (maxClusterSize < clusterSize) maxClusterSize = clusterSize;
             printClusterStatsToSTDOut(cluster);
         }
-        System.out.println("Reachable points : " + reachablePointsCount);
-        System.out.println("Clusters size : " + clusters.size());
+        System.out.println("Reachable points : " + reachablePointsCount + " from " + totalPoints);
+        System.out.println("Total clusters : " + clusters.size());
+        System.out.println("Biggest cluster size : " + maxClusterSize);
+        System.out.println("Smallest cluster size : " + minClusterSize);
     }
 
     private static void printClusterStatsToSTDOut(Cluster cluster) {
@@ -51,17 +56,13 @@ public class DeduplicationDBScan {
         System.out.println("----------------------");
     }
 
-    private static List<Map<String, Set<String>>> getDataList(Map<String, Map<String, Set<String>>> dataMap, int limit) {
-        List<Map<String, Set<String>>> data = new ArrayList<>();
-        for (String s:dataMap.keySet()) {
-            data.add(dataMap.get(s));
-            if (data.size() >= limit)
-                break;
-        }
-        return data;
+    private static List<USHMMPerson> getDataList(Map<String, Map<String, Set<String>>> dataMap) {
+        return dataMap.keySet().stream().map(
+                personId -> new USHMMPerson(personId, dataMap.get(personId))
+        ).collect(Collectors.toList());
     }
 
-    private static Map<String, Map<String, Set<String>>> getData(String cacheFileName) throws QueryEvaluationException, TupleQueryResultHandlerException {
+    private static Map<String, Map<String, Set<String>>> getDataFromCache(String cacheFileName) throws QueryEvaluationException, TupleQueryResultHandlerException {
         File cacheFile = new File(cacheFileName);
         if (cacheFile.exists())
             return (Map<String, Map<String, Set<String>>>) SerializationUtils.deserialize(cacheFileName);

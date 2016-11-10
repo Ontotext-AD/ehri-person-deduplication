@@ -41,16 +41,7 @@ public class USHMMPerson {
         return personString;
     }
 
-    public boolean equals(Object other){
-        boolean result;
-        if((other == null) || (getClass() != other.getClass())){
-            result = false;
-        } // end if
-        else{
-            USHMMPerson otherPeople = (USHMMPerson) other;
-            result = personId.equals(otherPeople.personId);
-        } // end else
-
-        return result;
-    } // end equals
+    public boolean equals(Object other) {
+        return !((other == null) || (getClass() != other.getClass())) && personId.equals(((USHMMPerson) other).personId);
+    }
 }
