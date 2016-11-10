@@ -11,12 +11,12 @@ public class USHMMPerson {
     private String personId;
     private Map<String, Set<String>> predicateObjectMap;
 
-    USHMMPerson(String personId, Map<String, Set<String>> predicateObjectMap) {
+    public USHMMPerson(String personId, Map<String, Set<String>> predicateObjectMap) {
         this.personId = personId;
         this.predicateObjectMap = predicateObjectMap;
     }
 
-    String getStringValue(String predicate) {
+    public String getStringValue(String predicate) {
         Set<String> objectsSet = predicateObjectMap.get(predicate);
         if (objectsSet != null) {
             Iterator<String> it = objectsSet.iterator();
@@ -40,4 +40,17 @@ public class USHMMPerson {
         }
         return personString;
     }
+
+    public boolean equals(Object other){
+        boolean result;
+        if((other == null) || (getClass() != other.getClass())){
+            result = false;
+        } // end if
+        else{
+            USHMMPerson otherPeople = (USHMMPerson) other;
+            result = personId.equals(otherPeople.personId);
+        } // end else
+
+        return result;
+    } // end equals
 }
