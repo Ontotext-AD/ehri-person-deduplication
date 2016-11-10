@@ -11,7 +11,7 @@ public class USHMMPerson {
     private String personId;
     private Map<String, Set<String>> predicateObjectMap;
 
-    public USHMMPerson(String personId, Map<String, Set<String>> predicateObjectMap) {
+    USHMMPerson(String personId, Map<String, Set<String>> predicateObjectMap) {
         this.personId = personId;
         this.predicateObjectMap = predicateObjectMap;
     }
