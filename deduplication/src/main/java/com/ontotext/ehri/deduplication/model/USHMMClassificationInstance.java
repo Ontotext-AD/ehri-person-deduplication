@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class USHMMClassificationInstance {
+class USHMMClassificationInstance {
 
     private Alphabet xA;
     private SparseVector sparseVector;
@@ -30,7 +30,7 @@ public class USHMMClassificationInstance {
 
     private static final Logger logger = LoggerFactory.getLogger(USHMMPersonsFeatureExtractor.class);
 
-    public USHMMClassificationInstance(Alphabet xA, USHMMPerson person1, USHMMPerson person2) {
+    USHMMClassificationInstance(Alphabet xA, USHMMPerson person1, USHMMPerson person2) {
         this.xA = xA;
         this.sparseVector = new SparseVector();
 
@@ -38,7 +38,7 @@ public class USHMMClassificationInstance {
         this.person2 = person2;
     }
 
-    public SparseVector getSparseVector() {
+    SparseVector getSparseVector() {
         extractNamesFeatures();
         extractMotherNameFeatures();
         extractPlaceBirthFeatures();
