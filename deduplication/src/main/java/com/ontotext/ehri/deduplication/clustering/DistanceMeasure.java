@@ -7,9 +7,8 @@ import types.LinearClassifier;
 import types.SparseVector;
 
 import java.util.Map;
-import java.util.Set;
 
-class DistanceMeasure<T> {
+class DistanceMeasure {
 
     private LinearClassifier model;
 
@@ -18,11 +17,9 @@ class DistanceMeasure<T> {
         this.model = model;
     }
 
-    double compute(T var1, T var2) {
+    double compute(USHMMPerson var1, USHMMPerson var2) {
         Alphabet xA = model.getxAlphabet();
-        USHMMPerson p1 = new USHMMPerson((String)((Set)((Map) var1).get("personId")).iterator().next(), (Map<String, Set<String>>) var1);
-        USHMMPerson p2 = new USHMMPerson((String)((Set)((Map) var2).get("personId")).iterator().next(), (Map<String, Set<String>>) var2);
-        SparseVector sparseVector = new USHMMClassificationInstance(xA, p1, p2).getSparseVector();
+        SparseVector sparseVector = new USHMMClassificationInstance(xA, var1, var2).getSparseVector();
         Map<String, Double> scores = model.labelScoreNormalized(sparseVector);
         return 1 - scores.get("YES");
     }

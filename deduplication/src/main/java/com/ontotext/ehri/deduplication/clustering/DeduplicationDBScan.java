@@ -1,5 +1,6 @@
 package com.ontotext.ehri.deduplication.clustering;
 
+import com.ontotext.ehri.deduplication.model.USHMMPerson;
 import com.ontotext.ehri.deduplication.sparql.EndpointConnection;
 import com.ontotext.ehri.deduplication.sparql.QueryResultHandler;
 import com.ontotext.ehri.deduplication.utils.SerializationUtils;
@@ -10,6 +11,7 @@ import utils.io.IOUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DeduplicationDBScan {
     public static void main(String[] args) throws QueryEvaluationException, TupleQueryResultHandlerException, IOException, ClassNotFoundException {
@@ -20,25 +22,16 @@ public class DeduplicationDBScan {
         Map<String, Map<String, Set<String>>> statementsMap = (Map<String, Map<String, Set<String>>>) SerializationUtils.deserialize(
                 "/home/nelly/workspace/statementsMap.cache"
         );
-        List<Map<String, Set<String>>> data = getGet(statementsMap, 1000);
+        List<USHMMPerson> data = getData(statementsMap);
         System.out.println(data.size());
         List<Cluster> clusters = dbscanClusterer.cluster(data);
         printClustersStatsToSTDOut(clusters);
     }
 
-    private static List<Map<String,Set<String>>> getGet(Map<String, Map<String, Set<String>>> statementsMap, int n) {
-        List<Map<String,Set<String>>> foo = new ArrayList<>();
-        for(String personId : statementsMap.keySet())
-        {
-            Map<String, Set<String>> m = statementsMap.get(personId);
-            Set<String> s = new HashSet<>();
-            s.add(personId);
-            m.put("personId", s);
-            foo.add(m);
-            if  (foo.size() >= n)
-                break;
-        }
-        return foo;
+    private static List<USHMMPerson> getData(Map<String, Map<String, Set<String>>> statementsMap) {
+        return statementsMap.keySet().stream().map(
+                personId -> new USHMMPerson(personId, statementsMap.get(personId))
+        ).collect(Collectors.toList());
     }
 
     private static void printClustersStatsToSTDOut(List<Cluster> clusters) {
@@ -54,17 +47,7 @@ public class DeduplicationDBScan {
 
     private static void printClusterStatsToSTDOut(Cluster cluster) {
         System.out.println("----------------------");
-        for (Object predicatesValuesObject : cluster.points) {
-            Map<String, Set<String>> predicatesValuesMap = (Map<String, Set<String>>) predicatesValuesObject;
-            Map<String, Set<String>> sortedPredicatesValuesMap = new TreeMap<>(predicatesValuesMap);
-            for (String predicate : sortedPredicatesValuesMap.keySet()) {
-                Set<String> predicateValuesSet = predicatesValuesMap.get(predicate);
-                System.out.print(predicate + ": " );
-                for (String value : predicateValuesSet)
-                    System.out.print(value + " ");
-            }
-            System.out.println();
-        }
+        cluster.points.forEach(System.out::println);
         System.out.println("----------------------");
     }
 
@@ -77,7 +60,6 @@ public class DeduplicationDBScan {
         }
         return data;
     }
-
 
     private static Map<String, Map<String, Set<String>>> getData(String cacheFileName) throws QueryEvaluationException, TupleQueryResultHandlerException {
         File cacheFile = new File(cacheFileName);
