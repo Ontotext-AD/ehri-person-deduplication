@@ -1,6 +1,5 @@
-package com.ontotext.ehri.deduplication;
+package com.ontotext.ehri.deduplication.classifier;
 
-import com.ontotext.ehri.deduplication.classifier.ClassifierTrainer;
 import com.ontotext.ehri.deduplication.model.USHMMGoldStandard;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -14,7 +13,7 @@ import java.net.URISyntaxException;
  * Train a linear classifier (multithreaded sigmoid perceptron) over the gold standard for the USHMM person deduplication task
  */
 
-public class USHMMPersonsDeduplication {
+public class ClassifierMain {
 
     public static void main(String[] args) throws Exception {
 

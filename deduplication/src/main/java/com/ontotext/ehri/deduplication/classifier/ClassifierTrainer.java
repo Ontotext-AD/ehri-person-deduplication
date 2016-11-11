@@ -28,7 +28,7 @@ class ClassifierTrainer extends BaseLinearClassifierTrainer {
 
     private static Map<ClassificationInstance, Pair<USHMMPerson, USHMMPerson>> classificationInstanceUSHMMPersonPairMap;
 
-    public ClassifierTrainer(Map<ClassificationInstance, Pair<USHMMPerson, USHMMPerson>> classificationInstanceUSHMMPersonPairMap) {
+    ClassifierTrainer(Map<ClassificationInstance, Pair<USHMMPerson, USHMMPerson>> classificationInstanceUSHMMPersonPairMap) {
 
         this.allData = new ArrayList<>(classificationInstanceUSHMMPersonPairMap.keySet());
         this.classificationInstanceUSHMMPersonPairMap = classificationInstanceUSHMMPersonPairMap;

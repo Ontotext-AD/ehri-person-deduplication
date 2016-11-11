@@ -6,14 +6,14 @@ import org.simmetrics.metrics.JaroWinkler;
 import java.util.*;
 import java.util.stream.Collectors;
 
-class DBSCANClusterer  {
+class DBSCANClustering {
 
     private final double eps;
     private final int minPts;
     private DistanceMeasure measure;
     private JaroWinkler jaroWinkler;
 
-    DBSCANClusterer(double eps, int minPts, DistanceMeasure measure) {
+    DBSCANClustering(double eps, int minPts, DistanceMeasure measure) {
         this.measure = measure;
         this.eps = eps;
         this.minPts = minPts;

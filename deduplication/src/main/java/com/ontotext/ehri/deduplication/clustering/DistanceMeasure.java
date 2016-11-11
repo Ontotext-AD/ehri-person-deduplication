@@ -1,6 +1,7 @@
 package com.ontotext.ehri.deduplication.clustering;
 
 import com.ontotext.ehri.deduplication.model.USHMMClassificationInstance;
+import com.ontotext.ehri.deduplication.model.USHMMGoldStandardEntry;
 import com.ontotext.ehri.deduplication.model.USHMMPerson;
 import types.Alphabet;
 import types.LinearClassifier;
@@ -21,7 +22,7 @@ class DistanceMeasure {
         Alphabet xA = model.getxAlphabet();
         SparseVector sparseVector = new USHMMClassificationInstance(xA, var1, var2).getSparseVector();
         Map<String, Double> scores = model.labelScoreNormalized(sparseVector);
-        return 1 - scores.get("YES");
+        return 1 - scores.get(USHMMGoldStandardEntry.POSITIVE_CLASS);
     }
 
 }

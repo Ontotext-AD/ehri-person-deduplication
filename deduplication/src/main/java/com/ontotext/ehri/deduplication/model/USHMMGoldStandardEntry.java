@@ -1,10 +1,10 @@
 package com.ontotext.ehri.deduplication.model;
 
-class USHMMGoldStandardEntry {
+public class USHMMGoldStandardEntry {
 
-    private static final String NEGATIVE_CLASS = "NO";
-    private static final String POSITIVE_CLASS = "YES";
-    private static final String NEUTRAL_CLASS = "UNCERTAIN";
+    public static final String NEGATIVE_CLASS = "NO";
+    public static final String POSITIVE_CLASS = "YES";
+    public static final String NEUTRAL_CLASS = "UNCERTAIN";
 
     private String personId1;
     private String personId2;
