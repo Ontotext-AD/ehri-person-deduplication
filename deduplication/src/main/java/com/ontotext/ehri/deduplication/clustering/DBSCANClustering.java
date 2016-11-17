@@ -20,15 +20,15 @@ class DBSCANClustering {
         jaroWinkler = new JaroWinkler();
     }
 
-    List<Cluster> cluster(List<USHMMPerson> points) {
-        List<Cluster> clusters = new ArrayList<>();
+    List<Cluster<USHMMPerson>> cluster(List<USHMMPerson> points) {
+        List<Cluster<USHMMPerson>> clusters = new ArrayList<>();
         Map<USHMMPerson, PointStatus> visited = new HashMap<>();
 
         for (USHMMPerson point : points) {
             if (visited.get(point) == null) {
                 List<USHMMPerson> neighbors = getNeighbors(point, points);
                 if (neighbors.size() >= minPts) {
-                    Cluster cluster = new Cluster();
+                    Cluster<USHMMPerson> cluster = new Cluster<>();
                     clusters.add(expandCluster(cluster, point, neighbors, points, visited));
                 } else {
                     visited.put(point, PointStatus.NOISE);
@@ -39,7 +39,7 @@ class DBSCANClustering {
         return clusters;
     }
 
-    private Cluster expandCluster(Cluster cluster, USHMMPerson point, List<USHMMPerson> neighbors,
+    private Cluster<USHMMPerson> expandCluster(Cluster<USHMMPerson> cluster, USHMMPerson point, List<USHMMPerson> neighbors,
                                   List<USHMMPerson> points, Map<USHMMPerson, PointStatus> visited) {
         cluster.addPoint(point);
         visited.put(point, PointStatus.PART_OF_CLUSTER);

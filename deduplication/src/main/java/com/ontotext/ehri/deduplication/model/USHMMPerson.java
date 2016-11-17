@@ -1,10 +1,11 @@
 package com.ontotext.ehri.deduplication.model;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-public class USHMMPerson {
+public class USHMMPerson implements Serializable {
 
     private static final String EMPTY_STRING = "";
 

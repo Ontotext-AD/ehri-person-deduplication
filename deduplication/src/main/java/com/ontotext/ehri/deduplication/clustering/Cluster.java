@@ -1,15 +1,13 @@
 package com.ontotext.ehri.deduplication.clustering;
 
-import com.ontotext.ehri.deduplication.model.USHMMPerson;
-
 import java.util.ArrayList;
 import java.util.List;
 
-class Cluster {
+class Cluster<T> {
 
-    final List<USHMMPerson> points = new ArrayList<>();
+    final List<T> points = new ArrayList<>();
 
-    void addPoint(USHMMPerson point) {
+    void addPoint(T point) {
         points.add(point);
     }
 

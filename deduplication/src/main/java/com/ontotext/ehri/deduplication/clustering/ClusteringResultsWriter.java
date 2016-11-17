@@ -7,9 +7,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-class ClusteringResultsWriter {
+class ClusteringResultsWriter<T> {
 
-    static void printResults(String resultsDir, List<Cluster> clusters, List<USHMMPerson> data, double epsilon, int minimalPoints) {
+    void printResults(String resultsDir, List<Cluster<T>> clusters, List<USHMMPerson> data, double epsilon, int minimalPoints) {
         try {
             PrintWriter writer = new PrintWriter(getFileNameResults(resultsDir), "UTF-8");
             printResultsToFile(writer, clusters, data, epsilon, minimalPoints);
@@ -19,17 +19,17 @@ class ClusteringResultsWriter {
         }
     }
 
-    private static String getFileNameResults(String resultsDir) {
+    private String getFileNameResults(String resultsDir) {
         return resultsDir + "log" + new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
     }
 
-    private static void printResultsToFile(PrintWriter writer, List<Cluster> clusters, List<USHMMPerson> data, double epsilon, int minimalPoints) {
+    private void printResultsToFile(PrintWriter writer, List<Cluster<T>> clusters, List<USHMMPerson> data, double epsilon, int minimalPoints) {
         printHeaderInfo(writer, clusters, data.size(), epsilon, minimalPoints);
         printClustersToFile(writer, clusters);
         printUnreachablePointsToFile(writer, clusters, data);
     }
 
-    private static void printHeaderInfo(PrintWriter writer, List<Cluster> clusters, int totalPoints, double epsilon, int minimalPoints) {
+    private void printHeaderInfo(PrintWriter writer, List<Cluster<T>> clusters, int totalPoints, double epsilon, int minimalPoints) {
         int minClusterSize = totalPoints, maxClusterSize = -1;
         int reachablePointsCount = 0;
         for (Cluster cluster : clusters) {
@@ -48,25 +48,25 @@ class ClusteringResultsWriter {
     }
 
 
-    private static void printClustersToFile(PrintWriter writer, List<Cluster> clusters) {
-        for (Cluster cluster : clusters)
+    private void printClustersToFile(PrintWriter writer, List<Cluster<T>> clusters) {
+        for (Cluster<T> cluster : clusters)
             printClusterStatsToFile(writer, cluster);
     }
 
-    private static void printClusterStatsToFile(PrintWriter writer, Cluster cluster) {
+    private void printClusterStatsToFile(PrintWriter writer, Cluster<T> cluster) {
         writer.println("BEGIN CLUSTER =============================================");
         cluster.points.forEach(writer::println);
         writer.println("END CLUSTER =============================================");
         writer.println();
     }
 
-    private static void printUnreachablePointsToFile(PrintWriter writer, List<Cluster> clusters, List<USHMMPerson> data) {
+    private  void printUnreachablePointsToFile(PrintWriter writer, List<Cluster<T>> clusters, List<USHMMPerson> data) {
         writer.println("Unreachable points : ");
         writer.println();
         data.stream().filter(ushmmPerson -> !isReachable(clusters, ushmmPerson)).forEach(writer::println);
     }
 
-    private static boolean isReachable(List<Cluster> clusters, USHMMPerson ushmmPerson) {
+    private boolean isReachable(List<Cluster<T>> clusters, USHMMPerson ushmmPerson) {
         for (Cluster cluster : clusters)
             if (cluster.points.contains(ushmmPerson))
                 return true;
