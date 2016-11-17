@@ -20,7 +20,7 @@ public class DataProcessor {
     public static void main(String[] args) throws QueryEvaluationException, TupleQueryResultHandlerException, XMLStreamException, IOException {
 
         XMLOutputFactory factory = XMLOutputFactory.newInstance();
-        XMLStreamWriter writer = factory.createXMLStreamWriter(new FileWriter("/home/nelly/data1.xml"));
+        XMLStreamWriter writer = factory.createXMLStreamWriter(new FileWriter("/home/nelly/data.xml"));
 
         writer.writeStartDocument();
         writer.writeStartElement("add");
@@ -34,9 +34,9 @@ public class DataProcessor {
                 "PREFIX ushmm: <http://data.ehri-project.eu/ushmm/ontology/>\n" +
                 "PREFIX onto: <http://data.ehri-project.eu/ontotext/>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                "select ?personId ?firstName ?lastName ?normalizedFirstName ?normalizedLastName ?normalizedName ?dateBirth ?placeBirth ?nameDM ?firstNameDM ?lastNameDM ?gender ?genderLinearClass ?genderRuleBased ?sourceId ?personType ?occupation ?nameMotherFirstName ?nameMotherLastName ?nationality where {\n" +
+                "select ?id ?firstName ?lastName ?normalizedFirstName ?normalizedLastName ?normalizedName ?dateBirth ?placeBirth ?nameDM ?firstNameDM ?lastNameDM ?gender ?genderLinearClass ?genderRuleBased ?sourceId ?personType ?occupation ?nameMotherFirstName ?nameMotherLastName ?nationality where {\n" +
                 "    ?person a ushmm:Person;\n" +
-                "        ushmm:personId ?personId.\n" +
+                "        ushmm:personId ?id.\n" +
                 "    optional { ?person ushmm:firstName ?firstName }\n" +
                 "    optional { ?person ushmm:lastName ?lastName }\n" +
                 "    optional { ?person onto:normalizedFirstName ?normalizedFirstName }\n" +
@@ -71,25 +71,24 @@ public class DataProcessor {
     }
 
     private static void writePersonPredicateObjectSetMap(XMLStreamWriter writer, Map<String, Set<String>> personPredicateObjectSetMap) throws XMLStreamException {
-        if ("5518082".equals(personPredicateObjectSetMap.get("personId").iterator().next())) {
-            writer.writeStartElement("doc");
+        writer.writeStartElement("doc");
 
-            writer.writeStartElement("field");
-            writer.writeAttribute("name", "id");
-            writer.writeCharacters(personPredicateObjectSetMap.get("personId").iterator().next());
-            writer.writeEndElement();
-
-            for (String predicate : personPredicateObjectSetMap.keySet()) {
-                for (String value : personPredicateObjectSetMap.get(predicate)) {
-                    writer.writeStartElement("field");
-                    writer.writeAttribute("name", predicate);
+        for (String predicate : personPredicateObjectSetMap.keySet()) {
+            for (String value : personPredicateObjectSetMap.get(predicate)) {
+                writer.writeStartElement("field");
+                writer.writeAttribute("name", predicate);
+                try {
                     writer.writeCharacters(value);
-                    writer.writeEndElement();
                 }
+                catch (Exception e) {
+                    System.out.println(value);
+                    System.exit(1);
+                }
+                writer.writeEndElement();
             }
-
-            writer.writeEndElement();
         }
+
+        writer.writeEndElement();
     }
 
     private static class DataProcessorHandler extends QueryResultHandler {
@@ -107,17 +106,9 @@ public class DataProcessor {
         @Override
         public void handleSolution(BindingSet bindingSet) throws TupleQueryResultHandlerException {
             try {
-                String personId = bindingSet.getValue("personId").stringValue();
-
-                if ("5518082".equals(personId)) {
-                    System.out.println(previousPersonId);
-                    System.out.println(!personId.equals(previousPersonId));
-                }
+                String personId = bindingSet.getValue("id").stringValue();
 
                 if (!personId.equals(previousPersonId)) {
-                    if ("5518082".equals(personId)) {
-                        System.out.println(!personPredicateObjectSetMap.isEmpty());
-                    }
                     if (!personPredicateObjectSetMap.isEmpty()) {
                         writePersonPredicateObjectSetMap(writer, personPredicateObjectSetMap);
                         ++c;
@@ -132,11 +123,10 @@ public class DataProcessor {
                         if (valuesSet == null) valuesSet = new HashSet<>();
                         valuesSet.add(bindingSet.getValue(bindingName).stringValue());
                         personPredicateObjectSetMap.put(bindingName, valuesSet);
-                        if ("5518082".equals(personId)) {
-                            System.out.println("put " + bindingName + " " +  valuesSet);
-                        }
                     }
                 }
+
+                previousPersonId = personId;
 
             } catch (XMLStreamException e) {
                 e.printStackTrace();
