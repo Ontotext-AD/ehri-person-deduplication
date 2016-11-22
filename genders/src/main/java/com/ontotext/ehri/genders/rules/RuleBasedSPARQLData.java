@@ -21,6 +21,7 @@ class RuleBasedSPARQLData {
         connection.open();
         TupleQuery query = connection.prepareSPARQLTupleQuery("" +
                 "PREFIX ushmm: <http://data.ehri-project.eu/ushmm/ontology/>\n" +
+                "PREFIX onto: <http://data.ehri-project.eu/ontotext/>\n" +
                 "select ?personId ?gender ?firstName ?lastName ?firstNameTransliterated ?lastNameTransliterated where {\n" +
                 "    ?person a ushmm:Person; ushmm:personId ?personId.\n" +
                 "    optional {?person ushmm:gender ?gender}\n" +

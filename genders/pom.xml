@@ -28,6 +28,11 @@
             <artifactId>sparql</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.ontotext.ehri</groupId>
+            <artifactId>deduplication</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
 </project>
