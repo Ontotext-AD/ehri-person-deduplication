@@ -1,4 +1,4 @@
-package com.ontotext.ehri.deduplication.sparql;
+package com.ontotext.ehri.sparql;
 
 import org.openrdf.query.QueryResultHandlerException;
 import org.openrdf.query.TupleQueryResultHandler;
