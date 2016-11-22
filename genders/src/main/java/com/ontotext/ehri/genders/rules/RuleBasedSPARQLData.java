@@ -24,8 +24,8 @@ class RuleBasedSPARQLData {
                 "select ?personId ?gender ?firstName ?lastName ?firstNameTransliterated ?lastNameTransliterated where {\n" +
                 "    ?person a ushmm:Person; ushmm:personId ?personId.\n" +
                 "    optional {?person ushmm:gender ?gender}\n" +
-                "    optional {?person ushmm:firstName ?firstName}\n" +
-                "    optional {?person ushmm:lastName ?lastName}\n" +
+                "    optional {?person onto:normalizedFirstName ?firstName}\n" +
+                "    optional {?person onto:normalizedLastName ?lastName}\n" +
                 "    optional {?person ushmm:nameTransliterated / ushmm:firstName ?firstNameTransliterated}\n" +
                 "    optional {?person ushmm:nameTransliterated / ushmm:lastName ?lastNameTransliterated}\n" +
                 "}");
