@@ -1,7 +1,7 @@
 package com.ontotext.ehri.genders.classifier.labeling;
 
-import com.ontotext.ehri.deduplication.sparql.EndpointConnection;
-import com.ontotext.ehri.deduplication.sparql.QueryResultHandler;
+import com.ontotext.ehri.sparql.EndpointConnection;
+import com.ontotext.ehri.sparql.QueryResultHandler;
 import com.ontotext.ehri.genders.classifier.model.PersonClassificationInstance;
 import com.ontotext.ehri.genders.classifier.model.PersonGenderFeatureExtractor;
 import javafx.util.Pair;

@@ -1,7 +1,7 @@
 package com.ontotext.ehri.genders.rules;
 
-import com.ontotext.ehri.deduplication.sparql.EndpointConnection;
-import com.ontotext.ehri.deduplication.sparql.QueryResultHandler;
+import com.ontotext.ehri.sparql.EndpointConnection;
+import com.ontotext.ehri.sparql.QueryResultHandler;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQuery;
@@ -15,7 +15,7 @@ import java.util.Map;
 class RuleBasedSPARQLData {
 
     static Map<String, List<String>> getData () throws QueryEvaluationException, TupleQueryResultHandlerException {
-        Map<String, List<String>> parsedData = new HashMap<>();
+        Map<String, List<String>> allData = new HashMap<>();
 
         EndpointConnection connection = new EndpointConnection();
         connection.open();
@@ -39,12 +39,12 @@ class RuleBasedSPARQLData {
                 String firstNameTransliterated = getValue(bindingSet, "firstNameTransliterated");
                 String lastNameTransliterated = getValue(bindingSet, "lastNameTransliterated");
                 dataList.add(gender); dataList.add(firstName); dataList.add(lastName); dataList.add(firstNameTransliterated); dataList.add(lastNameTransliterated);
-                parsedData.put(bindingSet.getValue("personId").stringValue(), dataList);
+                allData.put(bindingSet.getValue("personId").stringValue(), dataList);
             }
         });
 
         connection.close();
-        return parsedData;
+        return allData;
     }
 
     private static String getValue(BindingSet bindingSet, String bindingName) {

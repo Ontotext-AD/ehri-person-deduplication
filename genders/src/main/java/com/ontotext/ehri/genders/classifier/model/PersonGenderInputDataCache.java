@@ -1,7 +1,7 @@
 package com.ontotext.ehri.genders.classifier.model;
 
-import com.ontotext.ehri.deduplication.sparql.EndpointConnection;
-import com.ontotext.ehri.deduplication.sparql.QueryResultHandler;
+import com.ontotext.ehri.sparql.EndpointConnection;
+import com.ontotext.ehri.sparql.QueryResultHandler;
 import com.ontotext.ehri.deduplication.utils.SerializationUtils;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
