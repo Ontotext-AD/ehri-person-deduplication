@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 
-public abstract class BaseClassifierTrainer {
+public abstract class BaseLinearClassifierTrainer {
 
     public static final int SCORES_COUNT = 3;
     public static final int F1_OFFSET = 0;
@@ -21,7 +21,7 @@ public abstract class BaseClassifierTrainer {
     public static final int RECALL_OFFSET = 2;
 
     public static final int COUNT_EXPERIMENTS = 10;
-    public static final int DEFAULT_NUMBER_OF_THREADS = 4;
+    public static final int DEFAULT_NUMBER_OF_THREADS = 8;
 
     public static int numberOfIterations = 200;
 
@@ -32,7 +32,6 @@ public abstract class BaseClassifierTrainer {
     public Map<Integer, double[]> perExperimentScores;
     public Map<String, double[][]> perLabelScores;
 
-    public abstract LinearClassifier getLinearClassifierFromExperiment(int experiment);
     public abstract void computeAndStoreScores(int experiment, List<ClassificationInstance> testData, LinearClassifier linearClassifier);
 
     public void getAlphabetsAndStopGrowth() {
@@ -67,6 +66,24 @@ public abstract class BaseClassifierTrainer {
         for (int experiment = 0; experiment < COUNT_EXPERIMENTS; experiment++)
             linearClassifier = getLinearClassifierFromExperiment(experiment);
         return linearClassifier;
+    }
+
+    public LinearClassifier getLinearClassifierFromExperiment(int experiment) {
+        int splitSize = allData.size() / COUNT_EXPERIMENTS;
+        int offsetSplitLeft = (experiment) * (splitSize);
+        int offsetSplitRight = (experiment + 1) * (splitSize);
+
+        List<ClassificationInstance> trainData = getTrainData(offsetSplitLeft, offsetSplitRight);
+        List<ClassificationInstance> testData = allData.subList(offsetSplitLeft, offsetSplitRight);
+
+        return trainClassifierAndStoreComputedScores(experiment, trainData, testData);
+    }
+
+    private List<ClassificationInstance> getTrainData(int offsetSplitLeft, int offsetSplitRight) {
+        List<ClassificationInstance> trainData = new ArrayList<>(allData.subList(0, offsetSplitLeft));
+        List<ClassificationInstance> trainRightSide = new ArrayList<>(allData.subList(offsetSplitRight, allData.size()));
+        trainData.addAll(trainRightSide);
+        return trainData;
     }
 
     public LinearClassifier trainClassifierAndStoreComputedScores(int experiment,

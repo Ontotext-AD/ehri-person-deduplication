@@ -11,17 +11,26 @@
     </parent>
 
     <artifactId>genders</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
             <groupId>com.ontotext.ehri</groupId>
             <artifactId>classifier</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.ontotext.ehri</groupId>
             <artifactId>normalization</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ontotext.ehri</groupId>
+            <artifactId>sparql</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ontotext.ehri</groupId>
+            <artifactId>deduplication</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>

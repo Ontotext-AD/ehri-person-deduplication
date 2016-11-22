@@ -1,31 +1,19 @@
 package com.ontotext.ehri.genders.classifier.train;
 
-import com.ontotext.ehri.classifier.BaseClassifierTrainer;
+import com.ontotext.ehri.classifier.BaseLinearClassifierTrainer;
 import types.ClassificationInstance;
 import types.LinearClassifier;
 import utils.MathUtils;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-class GendersClassifierTrainer extends BaseClassifierTrainer {
+class PersonGenderClassifierTrainer extends BaseLinearClassifierTrainer {
 
-    private static final double TRAIN_TO_ALL_RATIO = 0.9;
-
-    GendersClassifierTrainer(List<ClassificationInstance> allData) {
+    PersonGenderClassifierTrainer(List<ClassificationInstance> allData) {
         this.allData = allData;
         getAlphabetsAndStopGrowth();
         initializeScoresMaps();
-    }
-
-    @Override
-    public LinearClassifier getLinearClassifierFromExperiment(int experiment) {
-        Collections.shuffle(allData);
-        int offsetSplit = (int) (TRAIN_TO_ALL_RATIO * allData.size());
-        List<ClassificationInstance> trainData = allData.subList(0, offsetSplit);
-        List<ClassificationInstance> testData = allData.subList(offsetSplit, allData.size());
-        return trainClassifierAndStoreComputedScores(experiment, trainData, testData);
     }
 
     @Override

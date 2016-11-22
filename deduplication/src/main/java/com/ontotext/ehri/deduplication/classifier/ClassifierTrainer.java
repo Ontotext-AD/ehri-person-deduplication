@@ -1,6 +1,6 @@
 package com.ontotext.ehri.deduplication.classifier;
 
-import com.ontotext.ehri.classifier.BaseClassifierTrainer;
+import com.ontotext.ehri.classifier.BaseLinearClassifierTrainer;
 import com.ontotext.ehri.deduplication.model.USHMMPerson;
 import javafx.util.Pair;
 import org.apache.log4j.Logger;
@@ -14,7 +14,7 @@ import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.*;
 
-public class ClassifierTrainer extends BaseClassifierTrainer {
+class ClassifierTrainer extends BaseLinearClassifierTrainer {
 
     private static final transient Logger LOG = Logger.getLogger(ClassifierTrainer.class);
 
@@ -36,25 +36,6 @@ public class ClassifierTrainer extends BaseClassifierTrainer {
         getAlphabetsAndStopGrowth();
         initializeScoresMaps();
 
-    }
-
-    @Override
-    public LinearClassifier getLinearClassifierFromExperiment(int experiment) {
-        int splitSize = allData.size() / COUNT_EXPERIMENTS;
-        int offsetSplitLeft = (experiment) * (splitSize);
-        int offsetSplitRight = (experiment + 1) * (splitSize);
-
-        List<ClassificationInstance> trainData = getTrainData(offsetSplitLeft, offsetSplitRight);
-        List<ClassificationInstance> testData = allData.subList(offsetSplitLeft, offsetSplitRight);
-
-        return trainClassifierAndStoreComputedScores(experiment, trainData, testData);
-    }
-
-    private List<ClassificationInstance> getTrainData(int offsetSplitLeft, int offsetSplitRight) {
-        List<ClassificationInstance> trainData = new ArrayList<>(allData.subList(0, offsetSplitLeft));
-        List<ClassificationInstance> trainRightSide = new ArrayList<>(allData.subList(offsetSplitRight, allData.size()));
-        trainData.addAll(trainRightSide);
-        return trainData;
     }
 
     @Override

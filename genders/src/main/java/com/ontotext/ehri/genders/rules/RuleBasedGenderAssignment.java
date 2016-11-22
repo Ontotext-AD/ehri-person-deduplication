@@ -19,10 +19,10 @@ class RuleBasedGenderAssignment {
     private static Map<String, HashSet<String>> firstNameGenderMap;
     private static Map<String, HashSet<String>> nameGenderMap;
 
-    static Map<String, Pair<String, Double>> assignGendersByRule(Map<String, List<String>> parsedData) {
-        getKnownNameGenderMap(parsedData);
+    static Map<String, Pair<String, Double>> assignGendersByRule(Map<String, List<String>> allData) {
+        getKnownNameGenderMap(allData);
         Map<String, Pair<String, Double>> labeledData = new HashMap<>();
-        extractGenderByRule(parsedData, labeledData);
+        extractGenderByRule(allData, labeledData);
         return labeledData;
     }
 
