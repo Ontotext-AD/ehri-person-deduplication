@@ -3,6 +3,10 @@ package com.ontotext.ehri.genders.classifier.model;
 import com.ontotext.ehri.normalization.USHMMNationalityNormalization;
 import com.ontotext.ehri.normalization.USHMMPersonNameNormalization;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class PersonClassificationInstance {
 
     private static String SPACE = " ";
@@ -16,9 +20,9 @@ public class PersonClassificationInstance {
     public String normalizedName;
 
     public String gender;
-    public String nationality;
+    public Set<String> nationalitiesSet;
 
-    public PersonClassificationInstance(String firstName, String lastName, String nationality) {
+    public PersonClassificationInstance(String firstName, String lastName, Set<String> nationalitiesSet) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.name = firstName + SPACE + lastName;
@@ -27,7 +31,8 @@ public class PersonClassificationInstance {
         this.normalizedLastName = getNameAsKey(USHMMPersonNameNormalization.normalize(lastName));
         this.normalizedName = getNameAsKey(USHMMPersonNameNormalization.normalize(name));
 
-        this.nationality = USHMMNationalityNormalization.normalize(nationality);
+        this.nationalitiesSet = new HashSet<>(nationalitiesSet.size());
+        this.nationalitiesSet.addAll(nationalitiesSet.stream().map(USHMMNationalityNormalization::normalize).collect(Collectors.toList()));
     }
 
     private static String getNameAsKey(String name) {
@@ -39,7 +44,7 @@ public class PersonClassificationInstance {
         return nameAsKey.trim();
     }
 
-    public PersonClassificationInstance(String firstName, String lastName, String gender, String nationality) {
+    public PersonClassificationInstance(String firstName, String lastName, String gender, Set<String> nationality) {
         this(firstName, lastName, nationality);
         this.gender = gender;
     }

@@ -14,7 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Map;
 
-class GendersClassifierWriter {
+class PersonGenderClassifierWriter {
 
     private static final String BASE = "http://data.ehri-project.eu/";
     private static final String USHMM_PERSON_NAMESPACE = BASE + "ushmm/person/";
