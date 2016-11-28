@@ -1,4 +1,4 @@
-package com.ontotext.ehri.deduplication.model;
+package com.ontotext.ehri.deduplication.classifier.model;
 
 public class USHMMGoldStandardEntry {
 

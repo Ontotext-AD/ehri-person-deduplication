@@ -1,4 +1,4 @@
-package com.ontotext.ehri.deduplication.model;
+package com.ontotext.ehri.deduplication.classifier.model;
 
 import javafx.util.Pair;
 import types.ClassificationInstance;
