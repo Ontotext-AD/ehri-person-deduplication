@@ -31,7 +31,7 @@ class DBSCANClustering {
     private ApproximateSearch search = new ApproximateSearch();
     private NormalizedNamePersonIdIndex normalizedNamePersonIdIndex;
 
-    DBSCANClustering(double eps, int minPts, double levenshteinDistance, LinearClassifier model, USHMMPersonIndex personIndex) throws Exception {
+    DBSCANClustering(String indicesDirectory, double eps, int minPts, double levenshteinDistance, LinearClassifier model, USHMMPersonIndex personIndex) throws Exception {
         this.model = model;
         this.eps = eps;
         this.minPts = minPts;
@@ -40,12 +40,12 @@ class DBSCANClustering {
 
         xA = model.getxAlphabet();
 
-        personIdFSA = MinAcyclicFSA.read(new File("/home/nely/fwdPersonIdDict.bin"));
-        normalizedNameLowerCaseFSA = MinAcyclicFSA.read(new File("/home/nely/normalizedNameLowerCaseDictSorted.bin"));
-        normalizedNameLowerCaseReversedFSA = MinAcyclicFSA.read(new File("/home/nely/normalizedNameLowerCaseDictReversed.bin"));
+        personIdFSA = MinAcyclicFSA.read(new File(indicesDirectory + "personIdFSA.bin"));
+        normalizedNameLowerCaseFSA = MinAcyclicFSA.read(new File(indicesDirectory + "normalizedNameLowerCaseFSA.bin"));
+        normalizedNameLowerCaseReversedFSA = MinAcyclicFSA.read(new File(indicesDirectory + "normalizedNameLowerCaseFSAReversed.bin"));
 
         normalizedNamePersonIdIndex = new NormalizedNamePersonIdIndex(
-                personIndex, "/home/nely/normalizedNamePersonIdIndex.bin"
+                personIndex, indicesDirectory + "normalizedNamePersonIdIndex.bin"
         );
     }
 

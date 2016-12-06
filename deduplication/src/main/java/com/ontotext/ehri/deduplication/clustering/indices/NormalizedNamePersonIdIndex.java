@@ -1,6 +1,5 @@
 package com.ontotext.ehri.deduplication.clustering.indices;
 
-import com.ontotext.ehri.deduplication.clustering.approximata.BuildMinAcyclicFSA;
 import com.ontotext.ehri.deduplication.clustering.approximata.MinAcyclicFSA;
 import org.apache.log4j.Logger;
 
@@ -18,15 +17,9 @@ public class NormalizedNamePersonIdIndex {
     MinAcyclicFSA normalizedNameFSA;
    USHMMPersonIndex personIndex;
 
-//
-//    public static void main(String[] args) throws Exception {
-//        NormalizedNamePersonIdIndex index = new NormalizedNamePersonIdIndex(
-//                ccc);
-//    }
-
     public NormalizedNamePersonIdIndex(USHMMPersonIndex personIndex, String indexFileName) throws Exception {
         this.personIndex = personIndex;
-       normalizedNameFSA = buildAndSerializeNormalizedNameFSA();
+        normalizedNameFSA = buildAndSerializeNormalizedNameFSA();
         File indexFile = new File(indexFileName);
         if (indexFile.exists()) {
             logger.info("Begin read index");
@@ -49,34 +42,7 @@ public class NormalizedNamePersonIdIndex {
     }
 
     private MinAcyclicFSA buildAndSerializeNormalizedNameFSA() throws Exception {
-
-//        BuildMinAcyclicFSA buildMinAcyclicFSA = new BuildMinAcyclicFSA();
-//        buildMinAcyclicFSA.sortFile(
-//                "/home/nely/normalizedNameLowerCaseDict.txt",
-//                "UTF-8",
-//                "/home/nely/normalizedNameLowerCaseDictSorted.txt",
-//                "UTF-8"
-//        );
-//        buildMinAcyclicFSA.buildMinAcyclicFSA(
-//                "/home/nely/normalizedNameLowerCaseDictSorted.txt",
-//                "UTF-8",
-//                "true",
-//                "/home/nely/normalizedNameLowerCaseDictSorted.bin"
-//        );
-//
-//        buildMinAcyclicFSA.reverseFile(
-//                "/home/nely/normalizedNameLowerCaseDict.txt",
-//                "UTF-8",
-//                "/home/nely/normalizedNameLowerCaseDictReversed.txt",
-//                "UTF-8"
-//        );
-//        buildMinAcyclicFSA.buildMinAcyclicFSA(
-//                "/home/nely/normalizedNameLowerCaseDictReversed.txt",
-//                "UTF-8",
-//                "false",
-//                "/home/nely/normalizedNameLowerCaseDictReversed.bin"
-//        );
-  return MinAcyclicFSA.read(new File("/home/nely/normalizedNameLowerCaseDictSorted.bin"));
+        return MinAcyclicFSA.read(new File("/home/nely/normalizedNameLowerCaseDictSorted.bin"));
 
     }
 

@@ -13,16 +13,17 @@ import java.util.List;
 
 public class ClusteringMain {
 
-    private static final double epsilon = 0.00001d;
+    private static final double epsilon = 0.0000001d;
     private static final int minimalPoints = 2;
-    private static final double levenshteinDistance = 0.10d;
+    private static final double levenshteinDistance = 0.25d;
 
     public static void main(String[] args) throws Exception {
 
         Namespace ns = getNamespace(args);
         if (ns != null) {
             String modelFilepath = ns.getString("modelFilepath");
-            clusterData(modelFilepath);
+            String indicesDirectory = ns.getString("indicesDirectory");
+            clusterData(modelFilepath, indicesDirectory);
         }
     }
 
@@ -40,13 +41,17 @@ public class ClusteringMain {
     private static ArgumentParser getArgumentParser() {
         ArgumentParser parser = ArgumentParsers.newArgumentParser("cluster-persons");
         parser.addArgument("modelFilepath").help("Model File");
+        parser.addArgument("indicesDirectory").help("Indices Directory");
         return parser;
     }
 
-    private static void clusterData(String modelFilepath) throws Exception {
+    private static void clusterData(String modelFilepath, String indicesDirectory) throws Exception {
         LinearClassifier model = (LinearClassifier) IOUtils.loadModel(new File(modelFilepath).toURI().toURL());
-        USHMMPersonIndex personIndex = new USHMMPersonIndex("/home/nely/fwdPersonIdDict.bin", "/home/nely/index.bin");
-        DBSCANClustering dbScan = new DBSCANClustering(epsilon, minimalPoints, levenshteinDistance, model, personIndex);
+        USHMMPersonIndex personIndex = new USHMMPersonIndex(
+                indicesDirectory + "personIdFSA.bin",
+                indicesDirectory + "index.bin"
+        );
+        DBSCANClustering dbScan = new DBSCANClustering(indicesDirectory, epsilon, minimalPoints, levenshteinDistance, model, personIndex);
         List<Cluster> clusters = dbScan.cluster();
         ClusteringResultsWriter<String> resultsWriter = new ClusteringResultsWriter<>();
         resultsWriter.printResults("/home/nely/", clusters, personIndex, epsilon, minimalPoints, levenshteinDistance, false);
