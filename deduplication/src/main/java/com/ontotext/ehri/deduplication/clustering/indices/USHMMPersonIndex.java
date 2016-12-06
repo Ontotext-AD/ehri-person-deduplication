@@ -27,7 +27,7 @@ public class USHMMPersonIndex implements Iterable<String> {
     private MinAcyclicFSA personIdFSA;
     private PredicateIndex predicateIntCache;
 
-    public static final int size = 3622508;
+    public final int size = 3622508;
 
     public USHMMPersonIndex(String personIdFSABin, String indexFileName) throws IOException, ClassNotFoundException, QueryEvaluationException, TupleQueryResultHandlerException {
 

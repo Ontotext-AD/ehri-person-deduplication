@@ -13,9 +13,9 @@ import java.util.List;
 
 public class ClusteringMain {
 
-    private static final double epsilon = 0.0000001d;
+    private static final double epsilon = 0.00000001d;
     private static final int minimalPoints = 2;
-    private static final double levenshteinDistance = 0.25d;
+    private static final double levenshteinDistance = 0.15d;
 
     public static void main(String[] args) throws Exception {
 
@@ -23,7 +23,8 @@ public class ClusteringMain {
         if (ns != null) {
             String modelFilepath = ns.getString("modelFilepath");
             String indicesDirectory = ns.getString("indicesDirectory");
-            clusterData(modelFilepath, indicesDirectory);
+            String resultsDirectory = ns.getString("resultsDirectory");
+            clusterData(modelFilepath, indicesDirectory, resultsDirectory);
         }
     }
 
@@ -42,19 +43,20 @@ public class ClusteringMain {
         ArgumentParser parser = ArgumentParsers.newArgumentParser("cluster-persons");
         parser.addArgument("modelFilepath").help("Model File");
         parser.addArgument("indicesDirectory").help("Indices Directory");
+        parser.addArgument("resultsDirectory").help("Results Directory");
         return parser;
     }
 
-    private static void clusterData(String modelFilepath, String indicesDirectory) throws Exception {
-        LinearClassifier model = (LinearClassifier) IOUtils.loadModel(new File(modelFilepath).toURI().toURL());
+    private static void clusterData(String modelFilepath, String indicesDirectory, String resultsDirectory) throws Exception {
+        LinearClassifier linearClassifier = (LinearClassifier) IOUtils.loadModel(new File(modelFilepath).toURI().toURL());
         USHMMPersonIndex personIndex = new USHMMPersonIndex(
                 indicesDirectory + "personIdFSA.bin",
                 indicesDirectory + "index.bin"
         );
-        DBSCANClustering dbScan = new DBSCANClustering(indicesDirectory, epsilon, minimalPoints, levenshteinDistance, model, personIndex);
+        DBSCANClustering dbScan = new DBSCANClustering(linearClassifier, epsilon, minimalPoints, levenshteinDistance, indicesDirectory, personIndex);
         List<Cluster> clusters = dbScan.cluster();
         ClusteringResultsWriter<String> resultsWriter = new ClusteringResultsWriter<>();
-        resultsWriter.printResults("/home/nely/", clusters, personIndex, epsilon, minimalPoints, levenshteinDistance, false);
+        resultsWriter.printResults(resultsDirectory, clusters, dbScan);
     }
 
 }

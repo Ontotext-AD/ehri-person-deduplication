@@ -42,7 +42,7 @@ public class NormalizedNamePersonIdIndex {
     }
 
     private MinAcyclicFSA buildAndSerializeNormalizedNameFSA() throws Exception {
-        return MinAcyclicFSA.read(new File("/home/nely/normalizedNameLowerCaseDictSorted.bin"));
+        return MinAcyclicFSA.read(new File("/home/nely/index/normalizedNameLowerCaseFSA.bin"));
 
     }
 

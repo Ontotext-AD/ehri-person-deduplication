@@ -1,7 +1,5 @@
 package com.ontotext.ehri.deduplication.clustering;
 
-import com.ontotext.ehri.deduplication.clustering.indices.USHMMPersonIndex;
-
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -9,24 +7,23 @@ import java.util.List;
 
 class ClusteringResultsWriter<T> {
 
-    void printResults(String resultsDir, List<Cluster> clusters, USHMMPersonIndex personIndex, double epsilon, int minimalPoints, double levenshteinDistance, boolean printUnreachablePoints) {
+    void printResults(String resultsDirectory, List<Cluster> clusters, DBSCANClustering dbscan) {
         try {
-            PrintWriter writer = new PrintWriter(getFileNameResults(resultsDir), "UTF-8");
-            printResultsToFile(writer, clusters, personIndex, epsilon, minimalPoints, levenshteinDistance, printUnreachablePoints);
+            PrintWriter writer = new PrintWriter(getFileNameResults(resultsDirectory), "UTF-8");
+            printResultsToFile(writer, clusters, dbscan);
             writer.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private String getFileNameResults(String resultsDir) {
-        return resultsDir + "log" + new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+    private String getFileNameResults(String resultsDirectory) {
+        return resultsDirectory + "results-Clustering-" + new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(new Date()) + ".txt";
     }
 
-    private void printResultsToFile(PrintWriter writer, List<Cluster> clusters, USHMMPersonIndex personIndex, double epsilon, int minimalPoints, double levenshteinDistance, boolean printUnreachablePoints) {
-        printHeaderInfo(writer, clusters, personIndex.size, epsilon, minimalPoints, levenshteinDistance);
+    private void printResultsToFile(PrintWriter writer, List<Cluster> clusters, DBSCANClustering dbscan) {
+        printHeaderInfo(writer, clusters, dbscan.personIndex.size, dbscan.eps, dbscan.minPts, dbscan.levenshteinDistance);
         printClustersToFile(writer, clusters);
-        printUnreachablePointsToFile(writer, clusters, personIndex, printUnreachablePoints);
     }
 
     private void printHeaderInfo(PrintWriter writer, List<Cluster> clusters, int totalPoints, double epsilon, int minimalPoints, double levenshteinDistance) {
@@ -61,22 +58,4 @@ class ClusteringResultsWriter<T> {
         writer.println("END CLUSTER =============================================");
         writer.println();
     }
-
-    private void printUnreachablePointsToFile(PrintWriter writer, List<Cluster> clusters, USHMMPersonIndex personIndex, boolean printUnreachablePoints) {
-        if (printUnreachablePoints) {
-            writer.println("Unreachable points : ");
-            writer.println();
-            for (String personId : personIndex)
-                if (!isReachable(clusters, personId))
-                    writer.println(personId);
-        }
-    }
-
-    private boolean isReachable(List<Cluster> clusters, String personId) {
-        for (Cluster cluster : clusters)
-            if (cluster.points.contains(personId))
-                return true;
-        return false;
-    }
-
 }

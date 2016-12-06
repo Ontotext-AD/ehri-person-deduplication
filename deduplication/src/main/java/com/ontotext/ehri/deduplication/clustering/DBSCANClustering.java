@@ -16,40 +16,44 @@ import java.util.stream.Collectors;
 
 class DBSCANClustering {
 
-    private final double eps;
-    private final int minPts;
-    private final double levenshteinDistance;
+    final double eps;
+    final int minPts;
+
+    final double levenshteinDistance;
+
+    private ApproximateSearch search;
 
     private LinearClassifier model;
     private Alphabet xA;
-    private USHMMPersonIndex personIndex;
 
+    USHMMPersonIndex personIndex;
     private MinAcyclicFSA personIdFSA;
     private MinAcyclicFSA normalizedNameLowerCaseFSA;
     private MinAcyclicFSA normalizedNameLowerCaseReversedFSA;
 
-    private ApproximateSearch search = new ApproximateSearch();
+
     private NormalizedNamePersonIdIndex normalizedNamePersonIdIndex;
 
-    DBSCANClustering(String indicesDirectory, double eps, int minPts, double levenshteinDistance, LinearClassifier model, USHMMPersonIndex personIndex) throws Exception {
-        this.model = model;
+    DBSCANClustering(LinearClassifier model, double eps, int minPts, double levenshteinDistance, String indicesDirectory, USHMMPersonIndex personIndex) throws Exception {
         this.eps = eps;
         this.minPts = minPts;
+
         this.levenshteinDistance = levenshteinDistance;
+        this.search = new ApproximateSearch();
+
+        this.model = model;
+        this.xA = model.getxAlphabet();
+
+        this.personIdFSA = MinAcyclicFSA.read(new File(indicesDirectory + "personIdFSA.bin"));
+        this.normalizedNameLowerCaseFSA = MinAcyclicFSA.read(new File(indicesDirectory + "normalizedNameLowerCaseFSA.bin"));
+        this.normalizedNameLowerCaseReversedFSA = MinAcyclicFSA.read(new File(indicesDirectory + "normalizedNameLowerCaseFSAReversed.bin"));
         this.personIndex = personIndex;
+        this.normalizedNamePersonIdIndex = new NormalizedNamePersonIdIndex(personIndex, indicesDirectory + "normalizedNamePersonIdIndex.bin");
 
-        xA = model.getxAlphabet();
-
-        personIdFSA = MinAcyclicFSA.read(new File(indicesDirectory + "personIdFSA.bin"));
-        normalizedNameLowerCaseFSA = MinAcyclicFSA.read(new File(indicesDirectory + "normalizedNameLowerCaseFSA.bin"));
-        normalizedNameLowerCaseReversedFSA = MinAcyclicFSA.read(new File(indicesDirectory + "normalizedNameLowerCaseFSAReversed.bin"));
-
-        normalizedNamePersonIdIndex = new NormalizedNamePersonIdIndex(
-                personIndex, indicesDirectory + "normalizedNamePersonIdIndex.bin"
-        );
     }
 
     List<Cluster> cluster() throws Exception {
+
         List<Cluster> clusters = new ArrayList<>();
         Map<String, PointStatus> visited = new HashMap<>();
 
