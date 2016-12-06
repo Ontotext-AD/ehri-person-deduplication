@@ -3,15 +3,11 @@ package com.ontotext.ehri.deduplication.clustering.indices;
 import com.ontotext.ehri.deduplication.clustering.approximata.MinAcyclicFSA;
 import com.ontotext.ehri.sparql.EndpointConnection;
 import com.ontotext.ehri.sparql.QueryResultHandler;
-import org.apache.commons.codec.EncoderException;
-import org.apache.commons.codec.language.DaitchMokotoffSoundex;
-import org.apache.commons.codec.language.bm.BeiderMorseEncoder;
 import org.apache.log4j.Logger;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.rio.RDFHandlerException;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -32,10 +28,6 @@ public class USHMMPersonIndex implements Iterable<String> {
     private PredicateIndex predicateIntCache;
 
     public static final int size = 3622508;
-
-    public static void main(String[] args) throws ClassNotFoundException, QueryEvaluationException, TupleQueryResultHandlerException, IOException {
-        USHMMPersonIndex index = new USHMMPersonIndex("/home/nely/fwdPersonIdDict.bin", "/home/nely/index.bin");
-    }
 
     public USHMMPersonIndex(String personIdFSABin, String indexFileName) throws IOException, ClassNotFoundException, QueryEvaluationException, TupleQueryResultHandlerException {
 

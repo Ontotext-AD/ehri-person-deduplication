@@ -17,51 +17,32 @@ public class Levenshtein {
     private static final int SUBSTITUTION_COST = 1;
 
     public static double similarity(String s, String t) {
-        if (s.isEmpty() && t.isEmpty())
+        if (s.length() == 0 && t.length() == 0)
             return 1;
         else
             return 1 - (distance(s, t) / (double) Math.max(s.length(), t.length()));
     }
 
     public static int distance(String s, String t) {
-        if (s.isEmpty() || t.isEmpty())
+        if (s.length() == 0 || t.length() == 0)
             return Math.max(s.length(), t.length());
-        return calculateDistance(s, t);
-    }
 
-    private static int calculateDistance(String s, String t) {
         int[] previousRowDistances = new int[t.length() + 1];
         int[] currentRowDistances = new int[t.length() + 1];
 
-        initialize(previousRowDistances);
-        calculateIterativeTwoRows(s, t, previousRowDistances, currentRowDistances);
+        for (int i = 0; i < previousRowDistances.length; ++i)
+            previousRowDistances[i] = DELETION_COST * i;
+        for (int i = 0; i < s.length(); ++i) {
+            currentRowDistances[0] = DELETION_COST * (i + 1);
+            for (int j = 0; j < t.length(); ++j)
+                currentRowDistances[j + 1] = Math.min(Math.min(
+                        currentRowDistances[j] + INSERTION_COST,
+                        previousRowDistances[j + 1] + DELETION_COST),
+                        previousRowDistances[j] + (s.charAt(i) == t.charAt(j) ? 0 : SUBSTITUTION_COST));
+            System.arraycopy(currentRowDistances, 0, previousRowDistances, 0, previousRowDistances.length);
+        }
 
         return currentRowDistances[t.length()];
-    }
-
-    private static void initialize(int[] previousRowDistances) {
-        for (int i = 0; i < previousRowDistances.length; i++)
-            previousRowDistances[i] = DELETION_COST * i;
-    }
-
-    private static void calculateIterativeTwoRows(String s, String t, int[] previousRowDistances, int[] currentRowDistances) {
-        for (int i = 0; i < s.length(); i++) {
-            calculateCurrentRowDistances(s, t, previousRowDistances, currentRowDistances, i);
-            copy(currentRowDistances, previousRowDistances);
-        }
-    }
-
-    private static void calculateCurrentRowDistances(String s, String t, int[] previousRowDistances, int[] currentRowDistances, int i) {
-        currentRowDistances[0] = DELETION_COST * (i + 1);
-        for (int j = 0; j < t.length(); j++)
-            currentRowDistances[j + 1] = Math.min(Math.min(
-                    currentRowDistances[j] + INSERTION_COST,
-                    previousRowDistances[j + 1] + DELETION_COST),
-                    previousRowDistances[j] + (s.charAt(i) == t.charAt(j) ? 0 : SUBSTITUTION_COST));
-    }
-
-    private static void copy(int[] currentRowDistances, int[] previousRowDistances) {
-        System.arraycopy(currentRowDistances, 0, previousRowDistances, 0, previousRowDistances.length);
     }
 
 }
