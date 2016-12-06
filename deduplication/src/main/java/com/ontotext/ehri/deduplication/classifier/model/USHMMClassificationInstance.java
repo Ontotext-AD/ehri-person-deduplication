@@ -1,19 +1,15 @@
 package com.ontotext.ehri.deduplication.classifier.model;
 
-import com.ontotext.ehri.deduplication.index.USHMMPersonIndex;
+import com.ontotext.ehri.deduplication.clustering.indices.USHMMPersonIndex;
 import com.ontotext.ehri.deduplication.measures.Levenshtein;
 import com.ontotext.ehri.deduplication.measures.USHMMDate;
 import com.ontotext.ehri.normalization.USHMMNationalityNormalization;
-import org.apache.commons.codec.EncoderException;
-import org.apache.commons.codec.language.DaitchMokotoffSoundex;
-import org.apache.commons.codec.language.bm.BeiderMorseEncoder;
 import org.simmetrics.metrics.JaroWinkler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import types.Alphabet;
 import types.SparseVector;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class USHMMClassificationInstance {
 
@@ -26,10 +22,6 @@ public class USHMMClassificationInstance {
     private USHMMPersonIndex index;
 
     private static final JaroWinkler jaroWinkler = new JaroWinkler();
-    private static final DaitchMokotoffSoundex daitchMokotoffSoundex = new DaitchMokotoffSoundex();
-    private static final BeiderMorseEncoder beiderMorseEncoder = new BeiderMorseEncoder();
-
-    private static final Logger logger = LoggerFactory.getLogger(USHMMPersonsFeatureExtractor.class);
 
     public USHMMClassificationInstance(Alphabet xA, String personId1, String personId2, USHMMPersonIndex index) {
         this.xA = xA;
@@ -115,16 +107,15 @@ public class USHMMClassificationInstance {
         extractJaroWinklerNamesFeatures();
         extractJaroWinklerNormalizedNamesFeatures();
         extractDoubleMetaphoneFeatures();
-        extractBeiderMorseFeatures();
         extractDaitchMokotoffFeatures();
     }
 
     private void extractJaroWinklerNamesFeatures() {
-        String firstNamePerson1 = index.getValue(personId1, "firstName");
-        String lastNamePerson1 = index.getValue(personId1, "lastName");
+        String firstNamePerson1 = index.getValueLowerCase(personId1, "firstName");
+        String lastNamePerson1 = index.getValueLowerCase(personId1, "lastName");
         String namePerson1 = firstNamePerson1 + " " + lastNamePerson1;
-        String firstNamePerson2 = index.getValue(personId2, "firstName");
-        String lastNamePerson2 = index.getValue(personId2, "lastName");
+        String firstNamePerson2 = index.getValueLowerCase(personId2, "firstName");
+        String lastNamePerson2 = index.getValueLowerCase(personId2, "lastName");
         String namePerson2 = firstNamePerson2 + " " + lastNamePerson2;
 
         addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank("jwf", firstNamePerson1, firstNamePerson2);
@@ -135,66 +126,45 @@ public class USHMMClassificationInstance {
     private void extractJaroWinklerNormalizedNamesFeatures() {
         addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank(
                 "jwnf",
-                index.getValue(personId1, "normalizedFirstName"),
-                index.getValue(personId2, "normalizedFirstName")
+                index.getValueLowerCase(personId1, "normalizedFirstName"),
+                index.getValueLowerCase(personId2, "normalizedFirstName")
         );
         addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank(
                 "jwnl",
-                index.getValue(personId1, "normalizedLastName"),
-                index.getValue(personId2, "normalizedLastName")
+                index.getValueLowerCase(personId1, "normalizedLastName"),
+                index.getValueLowerCase(personId2, "normalizedLastName")
         );
         addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank(
                 "jwn",
-                index.getValue(personId1, "normalizedName"),
-                index.getValue(personId2, "normalizedName")
+                index.getValueLowerCase(personId1, "normalizedName"),
+                index.getValueLowerCase(personId2, "normalizedName")
         );
     }
 
     private void extractDoubleMetaphoneFeatures() {
         addFeatureTwoNotBlankStringsMatch(
                 "dmfn",
-                index.getValue(personId1, "firstNameDM"),
-                index.getValue(personId2, "firstNameDM")
+                index.getValueLowerCase(personId1, "firstNameDM"),
+                index.getValueLowerCase(personId2, "firstNameDM")
         );
         addFeatureTwoNotBlankStringsMatch(
                 "dmln",
-                index.getValue(personId1, "lastNameDM"),
-                index.getValue(personId2, "lastNameDM")
+                index.getValueLowerCase(personId1, "lastNameDM"),
+                index.getValueLowerCase(personId2, "lastNameDM")
         );
         addFeatureTwoNotBlankStringsMatch(
                 "dmn",
-                index.getValue(personId1, "nameDM"),
-                index.getValue(personId2, "nameDM")
+                index.getValueLowerCase(personId1, "nameDM"),
+                index.getValueLowerCase(personId2, "nameDM")
         );
     }
 
-    private void extractBeiderMorseFeatures() {
-        String firstPersonNormalizedName = index.getValue(personId1, "normalizedName");
-        String secondPersonNormalizedName = index.getValue(personId2, "normalizedName");
-
-        try {
-            String[] firstPersonNormalizedNameBeiderMorseEncodings = beiderMorseEncoder.encode(firstPersonNormalizedName).split("|");
-            String[] secondPersonNormalizedNameBeiderMorseEncodings = beiderMorseEncoder.encode(secondPersonNormalizedName).split("|");
-            for (String s1 : firstPersonNormalizedNameBeiderMorseEncodings)
-                for (String s2: secondPersonNormalizedNameBeiderMorseEncodings)
-                    if(s1.equals(s2))
-                    {
-                        sparseVector.add(xA.lookupObject("bm"), 1.0d);
-                        break;
-                    }
-        } catch (EncoderException e) {
-            logger.warn(String.format(
-                    "Beider Morse encoder fail %s %s", firstPersonNormalizedName, secondPersonNormalizedName), e);
-        }
-    }
-
     private void extractDaitchMokotoffFeatures() {
-        String[] firstPersonNormalizedNameDaitchMokotoffEncodings = daitchMokotoffSoundex.soundex(index.getValue(personId1, "normalizedName")).split("|");
-        String[] secondPersonNormalizedNameDaitchMokotoffEncodings = daitchMokotoffSoundex.soundex(index.getValue(personId2, "normalizedName")).split("|");
+        String[] firstPersonNormalizedNameDaitchMokotoffEncodings = index.getValueLowerCase(personId1, "daitchMokotoffEncoding").split("|");
+        String[] secondPersonNormalizedNameDaitchMokotoffEncodings = index.getValueLowerCase(personId2, "daitchMokotoffEncoding").split("|");
         for (String s1 : firstPersonNormalizedNameDaitchMokotoffEncodings)
-            for (String s2: secondPersonNormalizedNameDaitchMokotoffEncodings)
-                if(s1.equals(s2))
-                {
+            for (String s2 : secondPersonNormalizedNameDaitchMokotoffEncodings)
+                if (s1.equals(s2)) {
                     sparseVector.add(xA.lookupObject("bm"), 1.0d);
                     break;
                 }
@@ -203,31 +173,30 @@ public class USHMMClassificationInstance {
     private void extractMotherNameFeatures() {
         addJaroWinklerSimilarityFeatureIfOneOfTheTwoStringsIsNotBlank(
                 "jwnm",
-                index.getValue(personId1, "nameMotherFirstName") + " " + index.getValue(personId1, "nameMotherLastName"),
-                index.getValue(personId2, "nameMotherFirstName") + " " + index.getValue(personId2, "nameMotherLastName")
+                index.getValueLowerCase(personId1, "nameMotherFirstName") + " " + index.getValueLowerCase(personId1, "nameMotherLastName"),
+                index.getValueLowerCase(personId2, "nameMotherFirstName") + " " + index.getValueLowerCase(personId2, "nameMotherLastName")
         );
     }
 
     private void extractPlaceBirthFeatures() {
         addLevenshteinSimilarityFeatureBetweenTwoSets(
                 "lpb",
-                index.getValues(personId1, "placeBirth"),
-                index.getValues(personId2, "placeBirth")
+                index.getValuesLowerCase(personId1, "placeBirth"),
+                index.getValuesLowerCase(personId2, "placeBirth")
         );
     }
 
     private void extractDateBirthFeatures() {
-        addUSHMMDateSimilarityFeatureBetweenTwoSets("db", index.getValues(personId1, "dateBirth"), index.getValues(personId2, "dateBirth"));
-        addLevenshteinSimilarityFeatureBetweenTwoSets("ldb", index.getValues(personId1, "dateBirth"), index.getValues(personId2, "dateBirth"));
+        addUSHMMDateSimilarityFeatureBetweenTwoSets("db", index.getValuesLowerCase(personId1, "dateBirth"), index.getValuesLowerCase(personId2, "dateBirth"));
+        addLevenshteinSimilarityFeatureBetweenTwoSets("ldb", index.getValuesLowerCase(personId1, "dateBirth"), index.getValuesLowerCase(personId2, "dateBirth"));
     }
 
     private void extractGenderFeature() {
         List<String> gendersFirstPerson = getPersonGenderSet(personId1);
         List<String> gendersSetSecondPerson = getPersonGenderSet(personId2);
         for (String s1 : gendersFirstPerson)
-            for (String s2: gendersSetSecondPerson)
-                if(s1.equals(s2))
-                {
+            for (String s2 : gendersSetSecondPerson)
+                if (s1.equals(s2)) {
                     sparseVector.add(xA.lookupObject("g"), 1.0d);
                     break;
                 }
@@ -235,14 +204,14 @@ public class USHMMClassificationInstance {
 
     private List<String> getPersonGenderSet(String personId) {
         List<String> gendersSetPerson = new ArrayList<>(2);
-        gendersSetPerson.add(index.getValue(personId, "gender"));
-        gendersSetPerson.add(index.getValue(personId, "genderLinearClass"));
-        gendersSetPerson.add(index.getValue(personId, "genderRuleBased"));
+        gendersSetPerson.add(index.getValueLowerCase(personId, "gender"));
+        gendersSetPerson.add(index.getValueLowerCase(personId, "genderLinearClass"));
+        gendersSetPerson.add(index.getValueLowerCase(personId, "genderRuleBased"));
         return gendersSetPerson;
     }
 
     private void extractSourceFeature() {
-        String source1 = index.getValue(personId1, "sourceId"), source2 = index.getValue(personId2, "sourceId");
+        String source1 = index.getValueLowerCase(personId1, "sourceId"), source2 = index.getValueLowerCase(personId2, "sourceId");
         String first = source2, second = source1;
         if (source1.compareTo(source2) <= 0) {
             first = source1;
@@ -253,28 +222,26 @@ public class USHMMClassificationInstance {
     }
 
     private void extractPersonTypeFeature() {
-        addFeatureTwoNotBlankStringsMatch("pt", index.getValue(personId1, "personType"), index.getValue(personId2, "personType"));
+        addFeatureTwoNotBlankStringsMatch("pt", index.getValueLowerCase(personId1, "personType"), index.getValueLowerCase(personId2, "personType"));
     }
 
     private void extractOccupationFeature() {
-        List<String> occupationsFirstPerson = index.getValues(personId1, "occupation");
-        List<String> occupationsSecondPerson = index.getValues(personId2, "occupation");
+        List<String> occupationsFirstPerson = index.getValuesLowerCase(personId1, "occupation");
+        List<String> occupationsSecondPerson = index.getValuesLowerCase(personId2, "occupation");
         for (String s1 : occupationsFirstPerson)
-            for (String s2: occupationsSecondPerson)
-                if (s1.equals(s2))
-                {
+            for (String s2 : occupationsSecondPerson)
+                if (s1.equals(s2)) {
                     sparseVector.add(xA.lookupObject("o"), 1.0d);
                     break;
                 }
     }
 
     private void extractNationalityFeature() {
-        List<String> nationalitiesFirstPerson = index.getValues(personId1, "nationality");
-        List<String> nationalitiesSecondPerson = index.getValues(personId2, "nationality");
+        List<String> nationalitiesFirstPerson = index.getValuesLowerCase(personId1, "nationality");
+        List<String> nationalitiesSecondPerson = index.getValuesLowerCase(personId2, "nationality");
         for (String s1 : nationalitiesFirstPerson)
-            for (String s2: nationalitiesSecondPerson)
-                if (nationalitiesMatch(s1, s2))
-                {
+            for (String s2 : nationalitiesSecondPerson)
+                if (nationalitiesMatch(s1, s2)) {
                     sparseVector.add(xA.lookupObject("n"), 1.0d);
                     break;
                 }

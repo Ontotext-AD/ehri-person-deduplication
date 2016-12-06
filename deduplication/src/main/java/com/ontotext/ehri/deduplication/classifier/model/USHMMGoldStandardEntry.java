@@ -6,28 +6,20 @@ public class USHMMGoldStandardEntry {
     public static final String POSITIVE_CLASS = "YES";
     public static final String NEUTRAL_CLASS = "UNCERTAIN";
 
-    private String personId1;
-    private String personId2;
-    private String label;
+    public String personId1;
+    public String personId2;
+    public String label;
 
-    USHMMGoldStandardEntry(String personId1, String personId2, String label) {
+    USHMMGoldStandardEntry(String personId1, String personId2, String actualLabel) {
         this.personId1 = personId1;
         this.personId2 = personId2;
-        this.label = label;
+        this.label = getLabel(actualLabel);
     }
 
-    String getPersonId1() {
-        return personId1;
-    }
-
-    String getPersonId2() {
-        return personId2;
-    }
-
-    String getLabel() {
-        if ("-2".equals(label))
+    private String getLabel(String actualLabel) {
+        if ("-2".equals(actualLabel))
             return NEGATIVE_CLASS;
-        else if ("2".equals(label))
+        else if ("2".equals(actualLabel))
             return POSITIVE_CLASS;
         else
             return NEUTRAL_CLASS;

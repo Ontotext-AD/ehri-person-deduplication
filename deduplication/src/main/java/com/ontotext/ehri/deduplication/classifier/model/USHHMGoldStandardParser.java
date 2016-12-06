@@ -13,14 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-class USHHMGoldStandardParser {
+public class USHHMGoldStandardParser {
 
     private static final Logger logger = LoggerFactory.getLogger(USHHMGoldStandardParser.class);
 
     private static final String[] HEADER = {"personId1", "personId2", "label"};
     private static final char DELIMITER = '\t';
 
-    static List<USHMMGoldStandardEntry> parse(String file) {
+    public static List<USHMMGoldStandardEntry> parse(String file) {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             return parseData(br);
         } catch (FileNotFoundException e) {

@@ -1,7 +1,7 @@
 package com.ontotext.ehri.deduplication.classifier;
 
 import com.ontotext.ehri.classifier.BaseLinearClassifierTrainer;
-import com.ontotext.ehri.deduplication.model.USHMMPerson;
+import com.ontotext.ehri.deduplication.clustering.indices.PredicateIndex;
 import javafx.util.Pair;
 import org.apache.log4j.Logger;
 import types.Alphabet;
@@ -26,11 +26,12 @@ class ClassifierTrainer extends BaseLinearClassifierTrainer {
     private static final int FP_INDEX = 1;
     private static final int FN_INDEX = 2;
 
-    private static Map<ClassificationInstance, Pair<USHMMPerson, USHMMPerson>> classificationInstanceUSHMMPersonPairMap;
+    private static Map<ClassificationInstance, Pair<List[], List[]>> classificationInstanceUSHMMPersonPairMap;
 
-    ClassifierTrainer(Map<ClassificationInstance, Pair<USHMMPerson, USHMMPerson>> classificationInstanceUSHMMPersonPairMap) {
+    ClassifierTrainer(Map<ClassificationInstance, Pair<List[], List[]>> classificationInstanceUSHMMPersonPairMap) {
 
         this.allData = new ArrayList<>(classificationInstanceUSHMMPersonPairMap.keySet());
+        Collections.shuffle(allData);
         this.classificationInstanceUSHMMPersonPairMap = classificationInstanceUSHMMPersonPairMap;
         numberOfIterations = 10000;
         getAlphabetsAndStopGrowth();
@@ -54,8 +55,8 @@ class ClassifierTrainer extends BaseLinearClassifierTrainer {
         int[] totalsInClass = new int[classCount];
         int[] confusionMatrix = new int[classCount * classCount];
 
-        List<ClassificationInstance> falseInstances = computeTpFpFn(h, data, tpInClass, fpInClass, fnInClass, totalsInClass, confusionMatrix);
-        outputFalseInstances(h, falseInstances);
+        List<ClassificationInstance> wrongLabeledInstances = computeTpFpFn(h, data, tpInClass, fpInClass, fnInClass, totalsInClass, confusionMatrix);
+        logInfoWrongLabeledInstances(h, wrongLabeledInstances);
         double[] micro = computeMicroMeasures(tpInClass, fpInClass, fnInClass);
         double[] accumulated = {0.0D, 0.0D, 0.0D};
         Map<Integer, double[]> perClassResults = computeResultsPerClass(h, tpInClass, fpInClass, fnInClass, accumulated);
@@ -84,17 +85,30 @@ class ClassifierTrainer extends BaseLinearClassifierTrainer {
         return falseInstances;
     }
 
-    private static void outputFalseInstances(LinearClassifier h, List<ClassificationInstance> falseInstances) {
-        for (ClassificationInstance inst : falseInstances)
-            outputInstance(h, inst);
+    private static void logInfoWrongLabeledInstances(LinearClassifier h, List<ClassificationInstance> wrongLabeledInstances) {
+        for (ClassificationInstance inst : wrongLabeledInstances) {
+            Alphabet yA = h.getyAlphabet();
+            LOG.info("Wrong class : " + yA.lookupInt(h.label(inst.x)) + " Actual class : " + yA.lookupInt(inst.y));
+            LOG.info(inst.x.toString());
+            logInfoPerson(classificationInstanceUSHMMPersonPairMap.get(inst).getKey());
+            logInfoPerson(classificationInstanceUSHMMPersonPairMap.get(inst).getValue());
+        }
     }
 
-    private static void outputInstance(LinearClassifier h, ClassificationInstance inst) {
-        Alphabet yA = h.getyAlphabet();
-        LOG.info("False class : " + yA.lookupInt(h.label(inst.x)) + " True class : " + yA.lookupInt(inst.y));
-        LOG.info(inst.x.toString());
-        LOG.info(classificationInstanceUSHMMPersonPairMap.get(inst).getKey());
-        LOG.info(classificationInstanceUSHMMPersonPairMap.get(inst).getValue());
+    private static void logInfoPerson(List[] person) {
+        PredicateIndex predicateIndex = new PredicateIndex();
+        String personInfo  = "";
+        for (int predicate = 0 ; predicate < person.length; ++predicate)
+        {
+            List<String> predicateValues = person[predicate];
+            if (predicateValues.size() > 0) {
+                personInfo += predicateIndex.intToString(predicate) + " ";
+                for (String value : predicateValues)
+                    personInfo += (value + " ");
+            }
+
+        }
+        LOG.info(personInfo);
     }
 
     private static double[] computeMicroMeasures(int[] tpInClass, int[] fpInClass, int[] fnInClass) {
