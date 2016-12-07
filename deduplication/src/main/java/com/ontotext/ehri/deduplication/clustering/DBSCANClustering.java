@@ -48,7 +48,7 @@ class DBSCANClustering {
         this.normalizedNameLowerCaseFSA = MinAcyclicFSA.read(new File(indicesDirectory + "normalizedNameLowerCaseFSA.bin"));
         this.normalizedNameLowerCaseReversedFSA = MinAcyclicFSA.read(new File(indicesDirectory + "normalizedNameLowerCaseFSAReversed.bin"));
         this.personIndex = personIndex;
-        this.normalizedNamePersonIdIndex = new NormalizedNamePersonIdIndex(personIndex, indicesDirectory + "normalizedNamePersonIdIndex.bin");
+        this.normalizedNamePersonIdIndex = new NormalizedNamePersonIdIndex(personIndex, indicesDirectory + "normalizedNamePersonIdIndex.bin", indicesDirectory);
 
     }
 

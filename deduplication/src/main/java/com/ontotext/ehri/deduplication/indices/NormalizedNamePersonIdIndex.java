@@ -18,9 +18,9 @@ public class NormalizedNamePersonIdIndex {
 
     private final int size;
 
-    public NormalizedNamePersonIdIndex(USHMMPersonIndex personIndex, String indexFileName) throws Exception {
+    public NormalizedNamePersonIdIndex(USHMMPersonIndex personIndex, String indexFileName, String indicesDirectory) throws Exception {
         this.personIndex = personIndex;
-        normalizedNameFSA = MinAcyclicFSA.read(new File("/home/nely/index/normalizedNameLowerCaseFSA.bin"));
+        normalizedNameFSA = MinAcyclicFSA.read(new File(indicesDirectory + "normalizedNameLowerCaseFSA.bin"));
         size = normalizedNameFSA.numberOfStrings;
 
         File indexFile = new File(indexFileName);

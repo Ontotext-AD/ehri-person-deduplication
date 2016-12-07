@@ -55,7 +55,7 @@ public class ClusteringMain {
         );
         DBSCANClustering dbScan = new DBSCANClustering(linearClassifier, maximumDistanceBetweenTwoPoints, minimalPointsInCluster, levenshteinDistance, indicesDirectory, personIndex);
         List<Cluster> clusters = dbScan.cluster();
-        ClusteringResultsWriter<String> resultsWriter = new ClusteringResultsWriter<>();
+        ClusteringResultsWriter resultsWriter = new ClusteringResultsWriter();
         resultsWriter.printResults(resultsDirectory, clusters, dbScan);
     }
 
