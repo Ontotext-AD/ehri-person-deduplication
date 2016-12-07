@@ -122,7 +122,7 @@ public class USHMMPersonIndex implements Iterable<String> {
         long startExecution = System.currentTimeMillis();
         buildIndex();
         long executionTime = System.currentTimeMillis() - startExecution;
-        System.out.println("Finish build index in " + TimeUnit.MILLISECONDS.toMinutes(executionTime) + " minutes");
+        logger.info("Finish build index in " + TimeUnit.MILLISECONDS.toMinutes(executionTime) + " minutes");
     }
 
     private void buildIndex() throws QueryEvaluationException, TupleQueryResultHandlerException, IOException {
