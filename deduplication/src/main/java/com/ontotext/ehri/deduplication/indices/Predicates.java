@@ -40,7 +40,7 @@ public class Predicates implements Iterable<Integer> {
                 "?s onto:normalizedFirstName ?o.",
                 "?s onto:normalizedLastName ?o.",
                 "?s onto:normalizedName ?o.",
-                "?s ushmm:dateBirth / ushmm:date ?o.",
+                "{?s ushmm:dateBirth ?o} union {?s ushmm:dateBirth / ushmm:date ?o}",
                 "?s ushmm:placeBirth / ushmm:cityTown ?o.",
                 "?s onto:nameDM ?o.",
                 "?s onto:firstNameDM ?o.",
