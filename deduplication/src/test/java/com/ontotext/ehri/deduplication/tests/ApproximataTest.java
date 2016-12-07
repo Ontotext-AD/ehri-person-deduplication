@@ -1,14 +1,14 @@
 package com.ontotext.ehri.deduplication.tests;
 
+import com.ontotext.ehri.deduplication.clustering.approximata.Approximate;
 import com.ontotext.ehri.deduplication.clustering.approximata.BuildMinAcyclicFSA;
 import com.ontotext.ehri.deduplication.clustering.approximata.MinAcyclicFSA;
 import org.junit.Test;
 
 import java.io.*;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 public class ApproximataTest {
@@ -19,25 +19,66 @@ public class ApproximataTest {
     private static final int STRING_MIN_LENGTH = 1;
     private static final int STRING_MAX_LENGTH = 42;
 
+    private static final String STRINGS_FILE_NAME = "strings.txt";
+    private static final String SORTED_STRINGS_FILE_NAME = "sortedStrings.txt";
+    private static final String FWD_FSA_FILE_NAME = "fwdFSA.bin";
+
+    private static final String REVERSED_STRINGS_FILE_NAME = "reversedStrings.txt";
+    private static final String BWD_FSA_FILE_NAME = "bwdFSA.bin";
+
     private static final String UTF_8_ENCODING = "UTF-8";
     private static final String PERFECT_HASH = "true";
 
+    private static final String STRING_QUERY = "LOREMIPSUM";
+    private static final String GARBLED_STRING = "OREMIPPSUN";
+
     @Test
-    public void testBuildApproximataWithRandomStrings() throws Exception {
+    public void testApproximateSearch() throws Exception {
+
+        BuildMinAcyclicFSA buildMinAcyclicFSA = new BuildMinAcyclicFSA();
 
         Set<String> randomStringsSet = generateRandomStrings(NUMBER_OF_STRINGS, STRING_MIN_LENGTH, STRING_MAX_LENGTH);
 
-        String stringsFileName = createEmptyTemporaryFile("strings.txt");
+        String stringsFileName = createEmptyTemporaryFile(STRINGS_FILE_NAME);
         writeStringsToFile(stringsFileName, randomStringsSet);
-        String sortedStringsFileName = createEmptyTemporaryFile("sortedStrings.txt");
-        String fsaBinaryFileName = createEmptyTemporaryFile("fsa.bin");
+        String sortedStringsFileName = createEmptyTemporaryFile(SORTED_STRINGS_FILE_NAME);
+        String fwdFSAFileName = createEmptyTemporaryFile(FWD_FSA_FILE_NAME);
+        String reversedStringsFileName = createEmptyTemporaryFile(REVERSED_STRINGS_FILE_NAME);
+        String bwdFSAFileName = createEmptyTemporaryFile(BWD_FSA_FILE_NAME);
 
-        BuildMinAcyclicFSA buildMinAcyclicFSA = new BuildMinAcyclicFSA();
         buildMinAcyclicFSA.sortFile(stringsFileName, UTF_8_ENCODING, sortedStringsFileName, UTF_8_ENCODING);
-        buildMinAcyclicFSA.buildMinAcyclicFSA(sortedStringsFileName,UTF_8_ENCODING, PERFECT_HASH, fsaBinaryFileName);
-        MinAcyclicFSA minAcyclicFSA = MinAcyclicFSA.read(new File(fsaBinaryFileName));
+        buildMinAcyclicFSA.buildMinAcyclicFSA(sortedStringsFileName, UTF_8_ENCODING, PERFECT_HASH, fwdFSAFileName);
+        MinAcyclicFSA fwdFSA = MinAcyclicFSA.read(new File(fwdFSAFileName));
 
-        assertEquals(NUMBER_OF_STRINGS, minAcyclicFSA.numberOfStrings);
+        assertEquals(NUMBER_OF_STRINGS, fwdFSA.numberOfStrings);
+
+        buildMinAcyclicFSA.reverseFile(stringsFileName, UTF_8_ENCODING, reversedStringsFileName, UTF_8_ENCODING);
+        buildMinAcyclicFSA.buildMinAcyclicFSA(reversedStringsFileName, UTF_8_ENCODING, PERFECT_HASH, bwdFSAFileName);
+        MinAcyclicFSA bwdFSA = MinAcyclicFSA.read(new File(FWD_FSA_FILE_NAME));
+
+        Approximate approx = new Approximate();
+
+        String[] resultsFwd = approx.findFwd(fwdFSA, STRING_QUERY, 3, Approximate.TYPE_LEVENSHTEIN);
+        int[] resultsFwdBwd = approx.findFwdBwd(fwdFSA, bwdFSA, STRING_QUERY, 3, Approximate.TYPE_LEVENSHTEIN);
+
+        assertEquals(resultsFwd.length, resultsFwdBwd.length);
+
+        boolean containsGarbledString = false;
+        for (String result : resultsFwd)
+            if (result.equals(GARBLED_STRING)) {
+                containsGarbledString = true;
+                break;
+            }
+        assertTrue(containsGarbledString);
+
+        containsGarbledString = false;
+        int garbledStringInt = fwdFSA.stringToInt(GARBLED_STRING);
+        for (int result : resultsFwdBwd)
+            if (result == garbledStringInt) {
+                containsGarbledString = true;
+                break;
+            }
+        assertTrue(containsGarbledString);
 
     }
 
@@ -45,8 +86,10 @@ public class ApproximataTest {
         Random r = new Random(RANDOM_SEED);
         Set<String> randomStringsSet = new HashSet<>();
 
-        while (randomStringsSet.size() < numberOfStrings)
+        while (randomStringsSet.size() < numberOfStrings - 1)
             randomStringsSet.add(generateRandomString(r, minLength, maxLength));
+
+        randomStringsSet.add(GARBLED_STRING);
 
         return randomStringsSet;
     }

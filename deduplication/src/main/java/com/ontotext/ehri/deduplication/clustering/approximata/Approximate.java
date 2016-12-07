@@ -123,7 +123,7 @@ public class Approximate {
         return Arrays.copyOf(candidates.seq, candidates.seqStored);
 	}
 
-	protected String[] findFwd(MinAcyclicFSA phFwd, String query, int distance, int type) throws Exception{
+	public String[] findFwd(MinAcyclicFSA phFwd, String query, int distance, int type) throws Exception{
 		this.phFwd = phFwd;
 		this.distance = distance;
 		this.type = type;
