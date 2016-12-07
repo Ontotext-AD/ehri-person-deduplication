@@ -1,6 +1,6 @@
 package com.ontotext.ehri.deduplication.classifier.model;
 
-import com.ontotext.ehri.deduplication.clustering.indices.USHMMPersonIndex;
+import com.ontotext.ehri.deduplication.indices.USHMMPersonIndex;
 import javafx.util.Pair;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResultHandlerException;

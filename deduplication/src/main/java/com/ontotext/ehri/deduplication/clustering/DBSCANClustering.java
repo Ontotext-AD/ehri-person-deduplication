@@ -4,8 +4,8 @@ import com.ontotext.ehri.deduplication.classifier.model.USHMMClassificationInsta
 import com.ontotext.ehri.deduplication.classifier.model.USHMMGoldStandardEntry;
 import com.ontotext.ehri.deduplication.clustering.approximata.ApproximateSearch;
 import com.ontotext.ehri.deduplication.clustering.approximata.MinAcyclicFSA;
-import com.ontotext.ehri.deduplication.clustering.indices.NormalizedNamePersonIdIndex;
-import com.ontotext.ehri.deduplication.clustering.indices.USHMMPersonIndex;
+import com.ontotext.ehri.deduplication.indices.NormalizedNamePersonIdIndex;
+import com.ontotext.ehri.deduplication.indices.USHMMPersonIndex;
 import types.Alphabet;
 import types.LinearClassifier;
 import types.SparseVector;

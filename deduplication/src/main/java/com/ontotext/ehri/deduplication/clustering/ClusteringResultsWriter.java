@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-class ClusteringResultsWriter<T> {
+class ClusteringResultsWriter {
 
     void printResults(String resultsDirectory, List<Cluster> clusters, DBSCANClustering dbscan) {
         try {

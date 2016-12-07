@@ -1,4 +1,4 @@
-package com.ontotext.ehri.deduplication.clustering.indices;
+package com.ontotext.ehri.deduplication.indices;
 
 import com.ontotext.ehri.deduplication.clustering.approximata.MinAcyclicFSA;
 import com.ontotext.ehri.sparql.EndpointConnection;
@@ -27,11 +27,12 @@ public class USHMMPersonIndex implements Iterable<String> {
     private MinAcyclicFSA personIdFSA;
     private Predicates predicates;
 
-    public final int size = 3622508;
+    public final int size;
 
     public USHMMPersonIndex(String personIdFSABin, String indexFileName) throws IOException, ClassNotFoundException, QueryEvaluationException, TupleQueryResultHandlerException {
 
         personIdFSA = MinAcyclicFSA.read(new File(personIdFSABin));
+        size = personIdFSA.numberOfStrings;
         predicates = new Predicates();
 
         File indexFile = new File(indexFileName);
@@ -174,5 +175,4 @@ public class USHMMPersonIndex implements Iterable<String> {
         dataOut.flush();
         dataOut.close();
     }
-
 }

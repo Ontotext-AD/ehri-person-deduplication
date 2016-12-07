@@ -1,7 +1,7 @@
 package com.ontotext.ehri.deduplication.classifier;
 
 import com.ontotext.ehri.classifier.BaseLinearClassifierTrainer;
-import com.ontotext.ehri.deduplication.clustering.indices.Predicates;
+import com.ontotext.ehri.deduplication.indices.Predicates;
 import javafx.util.Pair;
 import org.apache.log4j.Logger;
 import types.Alphabet;

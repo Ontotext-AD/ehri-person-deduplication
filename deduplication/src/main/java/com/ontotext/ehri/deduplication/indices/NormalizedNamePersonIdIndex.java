@@ -1,4 +1,4 @@
-package com.ontotext.ehri.deduplication.clustering.indices;
+package com.ontotext.ehri.deduplication.indices;
 
 import com.ontotext.ehri.deduplication.clustering.approximata.MinAcyclicFSA;
 import org.apache.log4j.Logger;
@@ -12,16 +12,16 @@ public class NormalizedNamePersonIdIndex {
 
     private static final Logger logger = Logger.getLogger(NormalizedNamePersonIdIndex.class);
 
-    private static int COUNT = 2030176;
-
     private List[] index;
     private MinAcyclicFSA normalizedNameFSA;
     private USHMMPersonIndex personIndex;
 
+    private final int size;
+
     public NormalizedNamePersonIdIndex(USHMMPersonIndex personIndex, String indexFileName) throws Exception {
         this.personIndex = personIndex;
-
         normalizedNameFSA = MinAcyclicFSA.read(new File("/home/nely/index/normalizedNameLowerCaseFSA.bin"));
+        size = normalizedNameFSA.numberOfStrings;
 
         File indexFile = new File(indexFileName);
         if (indexFile.exists())
@@ -30,8 +30,8 @@ public class NormalizedNamePersonIdIndex {
             buildIndexAndWriteToFile(indexFileName);
     }
 
-    public List get(int normalizedNameInt) {
-        return index[normalizedNameInt];
+    public List get(int normalizedName) {
+        return index[normalizedName];
     }
 
     private void readIndexFromFileAndLogExecutionTime(String indexFileName) throws IOException {
@@ -43,10 +43,10 @@ public class NormalizedNamePersonIdIndex {
     }
 
     private void readIndexFromFile(String indexFileName) throws IOException {
-        index = new List[COUNT];
+        index = new List[size];
         DataInputStream dataIn = new DataInputStream(new FileInputStream(indexFileName));
 
-        for (int i = 0; i < COUNT; ++i) {
+        for (int i = 0; i < size; ++i) {
             int size = dataIn.readInt();
             index[i] = new ArrayList<String>(size);
             for (int k = 0; k < size; ++k)
@@ -68,7 +68,7 @@ public class NormalizedNamePersonIdIndex {
     }
 
     private void buildIndex() {
-        index = new List[COUNT];
+        index = new List[size];
         for (String personId : personIndex) {
             String normalizedNameLowerCase = personIndex.getValueLowerCase(personId, "normalizedName");
             if (!normalizedNameLowerCase.isEmpty()) {
@@ -92,7 +92,7 @@ public class NormalizedNamePersonIdIndex {
 
     private void writeIndexToFile(String indexFileName) throws IOException {
         DataOutputStream dataOut = new DataOutputStream(new FileOutputStream(indexFileName));
-        for (int i = 0; i < COUNT; i++) {
+        for (int i = 0; i < size; i++) {
             List<String> valuesList = index[i];
             dataOut.writeInt(valuesList.size());
             for (int k = 0; k < valuesList.size(); ++k)
@@ -103,5 +103,4 @@ public class NormalizedNamePersonIdIndex {
         dataOut.flush();
         dataOut.close();
     }
-
 }

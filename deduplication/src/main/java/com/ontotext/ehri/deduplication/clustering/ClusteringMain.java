@@ -1,6 +1,6 @@
 package com.ontotext.ehri.deduplication.clustering;
 
-import com.ontotext.ehri.deduplication.clustering.indices.USHMMPersonIndex;
+import com.ontotext.ehri.deduplication.indices.USHMMPersonIndex;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;

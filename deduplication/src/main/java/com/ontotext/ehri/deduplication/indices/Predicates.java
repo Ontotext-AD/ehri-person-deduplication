@@ -1,4 +1,4 @@
-package com.ontotext.ehri.deduplication.clustering.indices;
+package com.ontotext.ehri.deduplication.indices;
 
 import java.util.Arrays;
 import java.util.Iterator;

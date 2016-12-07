@@ -1,6 +1,6 @@
 package com.ontotext.ehri.deduplication.classifier.model;
 
-import com.ontotext.ehri.deduplication.clustering.indices.USHMMPersonIndex;
+import com.ontotext.ehri.deduplication.indices.USHMMPersonIndex;
 import com.ontotext.ehri.deduplication.measures.Levenshtein;
 import com.ontotext.ehri.deduplication.measures.USHMMDate;
 import com.ontotext.ehri.normalization.USHMMNationalityNormalization;
