@@ -1,7 +1,7 @@
 package com.ontotext.ehri.deduplication.classifier;
 
 import com.ontotext.ehri.classifier.BaseLinearClassifierTrainer;
-import com.ontotext.ehri.deduplication.clustering.indices.PredicateIndex;
+import com.ontotext.ehri.deduplication.clustering.indices.Predicates;
 import javafx.util.Pair;
 import org.apache.log4j.Logger;
 import types.Alphabet;
@@ -96,13 +96,13 @@ class ClassifierTrainer extends BaseLinearClassifierTrainer {
     }
 
     private static void logInfoPerson(List[] person) {
-        PredicateIndex predicateIndex = new PredicateIndex();
+        Predicates predicates = new Predicates();
         String personInfo  = "";
         for (int predicate = 0 ; predicate < person.length; ++predicate)
         {
             List<String> predicateValues = person[predicate];
             if (predicateValues.size() > 0) {
-                personInfo += predicateIndex.intToString(predicate) + " ";
+                personInfo += predicates.intToString(predicate) + " ";
                 for (String value : predicateValues)
                     personInfo += (value + " ");
             }

@@ -1,16 +1,15 @@
 package com.ontotext.ehri.deduplication.clustering.indices;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
-public class PredicateIndex {
+public class Predicates implements Iterable<Integer> {
 
-    protected List<String> predicates;
+    private List<String> predicates;
     private List<String> queries;
 
-    protected final int PREDICATES_COUNT = 20;
-
-    public PredicateIndex() {
+    public Predicates() {
 
         predicates = Arrays.asList(
                 "firstName",
@@ -60,15 +59,43 @@ public class PredicateIndex {
 
     }
 
-    public int predicateToInt(String predicate) {
+    public int size() {
+        return predicates.size();
+    }
+
+    public int stringToInt(String predicate) {
         return predicates.indexOf(predicate);
     }
 
-    public String predicateQuery(String predicate) {
-        return queries.get(predicates.indexOf(predicate));
+    public String intToString(int predicate) {
+        return predicates.get(predicate);
     }
 
-    public String intToString(int i) {
-        return predicates.get(i);
+    public String getQueryForPredicate(int predicate) {
+        return queries.get(predicate);
+    }
+
+    @Override
+    public Iterator<Integer> iterator() {
+        return new Iterator<Integer>() {
+
+            private int current = 0;
+
+            @Override
+            public boolean hasNext() {
+                return current < predicates.size();
+            }
+
+            @Override
+            public Integer next() {
+                return current++;
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
+
     }
 }

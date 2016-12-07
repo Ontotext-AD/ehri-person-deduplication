@@ -18,7 +18,7 @@ class ClusteringResultsWriter<T> {
     }
 
     private String getFileNameResults(String resultsDirectory) {
-        return resultsDirectory + "results-Clustering-" + new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(new Date()) + ".txt";
+        return resultsDirectory + "clusteringResults-" + new SimpleDateFormat("yyyy.MM.dd-HH:mm:ss").format(new Date()) + ".txt";
     }
 
     private void printResultsToFile(PrintWriter writer, List<Cluster> clusters, DBSCANClustering dbscan) {
