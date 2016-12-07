@@ -4,64 +4,70 @@ import com.ontotext.ehri.deduplication.clustering.approximata.BuildMinAcyclicFSA
 import com.ontotext.ehri.deduplication.clustering.approximata.MinAcyclicFSA;
 import org.junit.Test;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.concurrent.ThreadLocalRandom;
+import java.io.*;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
 public class ApproximataTest {
 
+    private static final int RANDOM_SEED = 666;
+
+    private static final int NUMBER_OF_STRINGS = 10000;
+    private static final int STRING_MIN_LENGTH = 1;
+    private static final int STRING_MAX_LENGTH = 42;
+
+    private static final String UTF_8_ENCODING = "UTF-8";
+    private static final String PERFECT_HASH = "true";
+
     @Test
     public void testBuildApproximataWithRandomStrings() throws Exception {
 
-        int numberOfStrings = 4000000;
+        Set<String> randomStringsSet = generateRandomStrings(NUMBER_OF_STRINGS, STRING_MIN_LENGTH, STRING_MAX_LENGTH);
 
-        String stringFileName = createTemporaryFileAndWriteRandomStrings("strings", "txt", numberOfStrings);
-        String sortedStringsFileName = createTemporaryFile("sortedStrings", "txt");
-        String fsaBinaryFileName = createTemporaryFile("fsa", "bin");
+        String stringsFileName = createEmptyTemporaryFile("strings.txt");
+        writeStringsToFile(stringsFileName, randomStringsSet);
+        String sortedStringsFileName = createEmptyTemporaryFile("sortedStrings.txt");
+        String fsaBinaryFileName = createEmptyTemporaryFile("fsa.bin");
 
         BuildMinAcyclicFSA buildMinAcyclicFSA = new BuildMinAcyclicFSA();
-        buildMinAcyclicFSA.sortFile(stringFileName, "UTF-8", sortedStringsFileName, "UTF-8");
-        buildMinAcyclicFSA.buildMinAcyclicFSA(sortedStringsFileName, "UTF-8", "false", fsaBinaryFileName);
-
+        buildMinAcyclicFSA.sortFile(stringsFileName, UTF_8_ENCODING, sortedStringsFileName, UTF_8_ENCODING);
+        buildMinAcyclicFSA.buildMinAcyclicFSA(sortedStringsFileName,UTF_8_ENCODING, PERFECT_HASH, fsaBinaryFileName);
         MinAcyclicFSA minAcyclicFSA = MinAcyclicFSA.read(new File(fsaBinaryFileName));
-        assertEquals(numberOfStrings, minAcyclicFSA.numberOfStrings);
+
+        assertEquals(NUMBER_OF_STRINGS, minAcyclicFSA.numberOfStrings);
 
     }
 
-    private String createTemporaryFileAndWriteRandomStrings(String fileName, String fileSuffix, int numberOfStrings) {
-        try {
-            File tempFile = File.createTempFile(fileName, fileSuffix);
-            tempFile.deleteOnExit();
-            BufferedWriter out = new BufferedWriter(new FileWriter(tempFile));
-            for (int i = 0; i < numberOfStrings; ++i)
-                out.write(generateRandomString(1, 40));
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return fileName + fileSuffix;
+    private Set<String> generateRandomStrings(int numberOfStrings, int minLength, int maxLength) {
+        Random r = new Random(RANDOM_SEED);
+        Set<String> randomStringsSet = new HashSet<>();
+
+        while (randomStringsSet.size() < numberOfStrings)
+            randomStringsSet.add(generateRandomString(r, minLength, maxLength));
+
+        return randomStringsSet;
     }
 
-    private String generateRandomString(int minLength, int maxLength) {
-        int randomLength = ThreadLocalRandom.current().nextInt(minLength, maxLength + 1);
+    private String generateRandomString(Random r, int minLength, int maxLength) {
+        int randomLength = minLength + r.nextInt(maxLength + 1);
         String randomString = "";
         for (int i = 0; i < randomLength; ++i)
-            randomString += (char) ThreadLocalRandom.current().nextInt('a', 'z' + 1);
+            randomString += 'a' + r.nextInt('z' + 1);
         return randomString;
     }
 
-    private String createTemporaryFile(String fileName, String fileSuffix) {
-        try {
-            File tempFile = File.createTempFile(fileName, fileSuffix);
-            tempFile.deleteOnExit();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return fileName + fileSuffix;
+    private String createEmptyTemporaryFile(String fileName) {
+        File tempFile = new File(fileName);
+        tempFile.deleteOnExit();
+        return fileName;
     }
-    
+
+    private void writeStringsToFile(String fileName, Set<String> stringSet) throws FileNotFoundException, UnsupportedEncodingException {
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(fileName), UTF_8_ENCODING));
+        stringSet.forEach(out::println);
+        out.close();
+    }
 }

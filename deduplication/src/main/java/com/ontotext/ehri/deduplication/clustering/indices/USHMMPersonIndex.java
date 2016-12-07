@@ -32,7 +32,6 @@ public class USHMMPersonIndex implements Iterable<String> {
     public USHMMPersonIndex(String personIdFSABin, String indexFileName) throws IOException, ClassNotFoundException, QueryEvaluationException, TupleQueryResultHandlerException {
 
         personIdFSA = MinAcyclicFSA.read(new File(personIdFSABin));
-        System.out.println(personIdFSA.numberOfStrings);
         predicates = new Predicates();
 
         File indexFile = new File(indexFileName);
@@ -42,9 +41,9 @@ public class USHMMPersonIndex implements Iterable<String> {
             buildIndexAndWriteToFile(indexFileName);
     }
 
-    //public List[] getPerson(String personId) {
-//        return index[personIdFSA.stringToInt(personId)];
-//    }
+    public List[] getPerson(String personId) {
+        return index[personIdFSA.stringToInt(personId)];
+    }
 
 
     public String getValueLowerCase(String personId, String predicate) {
