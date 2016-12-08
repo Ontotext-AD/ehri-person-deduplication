@@ -26,9 +26,9 @@ class ClassifierTrainer extends BaseLinearClassifierTrainer {
     private static final int FP_INDEX = 1;
     private static final int FN_INDEX = 2;
 
-    private static Map<ClassificationInstance, Pair<List[], List[]>> classificationInstanceUSHMMPersonPairMap;
+    private static Map<ClassificationInstance, Pair<Pair<String, List[]>, Pair<String, List[]>>> classificationInstanceUSHMMPersonPairMap;
 
-    ClassifierTrainer(Map<ClassificationInstance, Pair<List[], List[]>> classificationInstanceUSHMMPersonPairMap) {
+    ClassifierTrainer(Map<ClassificationInstance, Pair<Pair<String, List[]>, Pair<String, List[]>>> classificationInstanceUSHMMPersonPairMap) {
 
         this.allData = new ArrayList<>(classificationInstanceUSHMMPersonPairMap.keySet());
         Collections.shuffle(allData);
@@ -95,18 +95,17 @@ class ClassifierTrainer extends BaseLinearClassifierTrainer {
         }
     }
 
-    private static void logInfoPerson(List[] person) {
+    private static void logInfoPerson(Pair<String, List[]> person) {
         Predicates predicates = new Predicates();
-        String personInfo  = "";
-        for (int predicate = 0 ; predicate < person.length; ++predicate)
+        String personInfo  = "personId " + person.getKey();
+        for (int predicate = 0 ; predicate < predicates.size(); ++predicate)
         {
-            List<String> predicateValues = person[predicate];
+            List<String> predicateValues = person.getValue()[predicate];
             if (predicateValues.size() > 0) {
                 personInfo += predicates.intToString(predicate) + " ";
                 for (String value : predicateValues)
                     personInfo += (value + " ");
             }
-
         }
         LOG.info(personInfo);
     }

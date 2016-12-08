@@ -13,9 +13,9 @@ import java.util.List;
 
 public class ClusteringMain {
 
-    private static final double maximumDistanceBetweenTwoPoints = 0.00000001d;
+    private static final double maximumDistanceBetweenTwoPoints = 0.0000001d;
     private static final int minimalPointsInCluster = 2;
-    private static final double levenshteinDistance = 0.20d;
+    private static final double levenshteinDistance = 0.15d;
 
     public static void main(String[] args) throws Exception {
 
