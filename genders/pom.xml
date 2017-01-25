@@ -2,37 +2,37 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.ontotext.ehri</groupId>
-        <artifactId>person-deduplication</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>com.ontotext.ehri</groupId>
+    <artifactId>person-deduplication</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>genders</artifactId>
+  <artifactId>genders</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.ontotext.ehri</groupId>
-            <artifactId>classifier</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.ontotext.ehri</groupId>
-            <artifactId>normalization</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.ontotext.ehri</groupId>
-            <artifactId>sparql</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.ontotext.ehri</groupId>
-            <artifactId>deduplication</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>com.ontotext.ehri</groupId>
+      <artifactId>classifier</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.ontotext.ehri</groupId>
+      <artifactId>normalization</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.ontotext.ehri</groupId>
+      <artifactId>sparql</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.ontotext.ehri</groupId>
+      <artifactId>deduplication</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
 
 </project>
