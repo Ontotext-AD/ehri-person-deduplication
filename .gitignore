@@ -32,6 +32,3 @@ local.properties
 # IntelliJ IDEA #
 *.iml
 .idea/
-
-*.properties
-
