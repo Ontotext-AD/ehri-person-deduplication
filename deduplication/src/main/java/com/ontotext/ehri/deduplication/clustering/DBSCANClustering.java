@@ -51,9 +51,89 @@ class DBSCANClustering {
         this.normalizedNamePersonIdIndex = new NormalizedNamePersonIdIndex(personIndex, indicesDirectory + "normalizedNamePersonIdIndex.bin", indicesDirectory);
 
     }
+    
+    public List<Cluster> cluster(Set<String> d) throws Exception {
+        List<Cluster> clusters = new ArrayList<>();
+        Map<String, PointStatus> visited = new HashMap<>();
+
+        long start = System.currentTimeMillis();
+        for (String personId : d) {
+            if (visited.size() % 1000 == 0)
+                System.out.println("Visited " + visited.size());
+            if (visited.get(personId) == null) {
+                List<String> neighbors = getNeighbors(d, personId);
+                if (neighbors.size() >= minPts) {
+                    Cluster cluster = new Cluster();
+                    clusters.add(expandCluster(cluster, personId, neighbors, visited, d));
+                } else {
+                    visited.put(personId, PointStatus.NOISE);
+                }
+            }
+        }
+
+        System.out.println("Total execution time " + (System.currentTimeMillis() - start));
+        return clusters;
+    }
+
+    private Cluster expandCluster(Cluster cluster, String point, List<String> neighbors, Map<String, PointStatus> visited, Set<String> d) {
+        cluster.addPoint(point);
+        visited.put(point, PointStatus.PART_OF_CLUSTER);
+        List<String> seeds = new ArrayList<>(neighbors);
+
+        for (int index = 0; index < seeds.size(); ++index) {
+            String current = seeds.get(index);
+            PointStatus pStatus = visited.get(current);
+            if (pStatus == null) {
+                List<String> currentNeighbors = getNeighbors(d, current);
+                if (currentNeighbors.size() >= minPts) {
+                    seeds = merge(seeds, currentNeighbors);
+                }
+            }
+
+            if (pStatus != PointStatus.PART_OF_CLUSTER) {
+                visited.put(current, PointStatus.PART_OF_CLUSTER);
+                cluster.addPoint(current);
+            }
+        }
+
+        return cluster;
+    }
+
+    private List<String> getNeighbors(Set<String> d, String personId) {
+        List<String> neighbors = new ArrayList<>();
+
+        int personIdInt = personIdFSA.stringToInt(personId);
+        String normalizedNameLowerCase = personIndex.getValueLowerCase(personIdInt, "normalizedName");
+        int distance = (int) (normalizedNameLowerCase.length() * levenshteinDistance);
+
+        int[] candidates = new int[0];
+        try {
+            candidates = search.approximateSearch(
+                    normalizedNameLowerCaseFSA, normalizedNameLowerCaseReversedFSA, 0, distance, normalizedNameLowerCase
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        List<String> personIdsWithSimilarNames = new ArrayList<>();
+        for (int i = 0; i < candidates.length; ++i)
+            personIdsWithSimilarNames.addAll(normalizedNamePersonIdIndex.get(candidates[i]));
+
+        int ind = normalizedNameLowerCaseFSA.stringToInt(normalizedNameLowerCase);
+        if (ind != -1) {
+            List<String> personsSameName = normalizedNamePersonIdIndex.get(ind);
+            for (String personWithSameName : personsSameName)
+                personIdsWithSimilarNames.add(personWithSameName);
+        }
+
+        neighbors.addAll(personIdsWithSimilarNames.stream().filter(
+                personId1 -> !personId.equals(personId1) && d.contains(personId1) && distance(personId, personId1) <= eps
+        ).collect(Collectors.toList()));
+        return neighbors;
+    }
+
 
     List<Cluster> cluster() throws Exception {
-
         List<Cluster> clusters = new ArrayList<>();
         Map<String, PointStatus> visited = new HashMap<>();
 
