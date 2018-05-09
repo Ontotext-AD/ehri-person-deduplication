@@ -1,15 +1,19 @@
 package com.ontotext.ehri.genders.classifier.model;
 
-import com.ontotext.ehri.sparql.EndpointConnection;
-import com.ontotext.ehri.sparql.QueryResultHandler;
 import com.ontotext.ehri.genders.utils.SerializationUtils;
+import com.ontotext.ehri.sparql.QueryResultHandler;
+import com.ontotext.ehri.sparql.SesameServerRepositoryConnection;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResultHandlerException;
-
-import java.io.File;
-import java.util.*;
 
 public class PersonGenderInputDataCache {
 
@@ -34,7 +38,7 @@ public class PersonGenderInputDataCache {
     private static Map<String, Map<String, Set<String>>> createPersonIdPredicateObjectValueSetMap() throws QueryEvaluationException, TupleQueryResultHandlerException {
         Map<String, Map<String, Set<String>>> personIdPredicateObjectValueSetMap = new HashMap<>();
 
-        EndpointConnection connection = new EndpointConnection();
+        SesameServerRepositoryConnection connection = new SesameServerRepositoryConnection();
         connection.open();
         TupleQuery query = connection.prepareSPARQLTupleQuery("" +
                 "PREFIX ushmm: <http://data.ehri-project.eu/ushmm/ontology/>\n" +

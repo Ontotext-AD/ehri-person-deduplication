@@ -1,7 +1,7 @@
 package com.ontotext.ehri.deduplication.indices;
 
 import com.ontotext.ehri.deduplication.clustering.approximata.MinAcyclicFSA;
-import com.ontotext.ehri.sparql.EndpointConnection;
+import com.ontotext.ehri.sparql.SesameServerRepositoryConnection;
 import com.ontotext.ehri.sparql.QueryResultHandler;
 import org.apache.log4j.Logger;
 import org.openrdf.query.BindingSet;
@@ -132,7 +132,7 @@ public class USHMMPersonIndex implements Iterable<String> {
                 index[i][j] = new ArrayList<String>(1);
 
         for (Integer predicate : predicates) {
-            EndpointConnection connection = new EndpointConnection();
+            SesameServerRepositoryConnection connection = new SesameServerRepositoryConnection();
             connection.open();
             TupleQuery query = connection.prepareSPARQLTupleQuery("" +
                     "PREFIX ushmm: <http://data.ehri-project.eu/ushmm/ontology/>\n" +

@@ -1,6 +1,6 @@
 package com.ontotext.ehri.genders.classifier.labeling;
 
-import com.ontotext.ehri.sparql.EndpointConnection;
+import com.ontotext.ehri.sparql.SesameServerRepositoryConnection;
 import com.ontotext.ehri.sparql.QueryResultHandler;
 import com.ontotext.ehri.genders.classifier.model.PersonClassificationInstance;
 import com.ontotext.ehri.genders.classifier.model.PersonGenderFeatureExtractor;
@@ -26,7 +26,7 @@ class PersonGenderClassifierLabeler {
     private static Map<String, Map<String, Set<String>>> getDataToLabel() throws QueryEvaluationException, TupleQueryResultHandlerException {
         Map<String, Map<String, Set<String>>> personIdPredicateObjectValueSetMap = new HashMap<>();
 
-        EndpointConnection connection = new EndpointConnection();
+        SesameServerRepositoryConnection connection = new SesameServerRepositoryConnection();
         connection.open();
         TupleQuery query = connection.prepareSPARQLTupleQuery("" +
                 "PREFIX ushmm: <http://data.ehri-project.eu/ushmm/ontology/>\n" +
