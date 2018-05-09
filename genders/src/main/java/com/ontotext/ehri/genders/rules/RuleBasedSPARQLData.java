@@ -1,6 +1,6 @@
 package com.ontotext.ehri.genders.rules;
 
-import com.ontotext.ehri.sparql.EndpointConnection;
+import com.ontotext.ehri.sparql.SesameServerRepositoryConnection;
 import com.ontotext.ehri.sparql.QueryResultHandler;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
@@ -17,7 +17,7 @@ class RuleBasedSPARQLData {
     static Map<String, List<String>> getData () throws QueryEvaluationException, TupleQueryResultHandlerException {
         Map<String, List<String>> allData = new HashMap<>();
 
-        EndpointConnection connection = new EndpointConnection();
+        SesameServerRepositoryConnection connection = new SesameServerRepositoryConnection();
         connection.open();
         TupleQuery query = connection.prepareSPARQLTupleQuery("" +
                 "PREFIX ushmm: <http://data.ehri-project.eu/ushmm/ontology/>\n" +
